@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 function RestaurantPage() {
   const { restaurantId } = Route.useParams();
   const navigate = Route.useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const restaurant = mockRestaurants.find(r => r.id === restaurantId);
