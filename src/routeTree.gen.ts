@@ -13,6 +13,9 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as CounterImport } from './routes/counter'
 import { Route as IndexImport } from './routes/index'
+import { Route as CheckoutIndexImport } from './routes/checkout/index'
+import { Route as RestaurantRestaurantIdImport } from './routes/restaurant.$restaurantId'
+import { Route as OrderTrackingOrderIdImport } from './routes/order-tracking.$orderId'
 
 // Create/Update Routes
 
@@ -25,6 +28,24 @@ const CounterRoute = CounterImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CheckoutIndexRoute = CheckoutIndexImport.update({
+  id: '/checkout/',
+  path: '/checkout/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const RestaurantRestaurantIdRoute = RestaurantRestaurantIdImport.update({
+  id: '/restaurant/$restaurantId',
+  path: '/restaurant/$restaurantId',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const OrderTrackingOrderIdRoute = OrderTrackingOrderIdImport.update({
+  id: '/order-tracking/$orderId',
+  path: '/order-tracking/$orderId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -46,6 +67,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CounterImport
       parentRoute: typeof rootRoute
     }
+    '/order-tracking/$orderId': {
+      id: '/order-tracking/$orderId'
+      path: '/order-tracking/$orderId'
+      fullPath: '/order-tracking/$orderId'
+      preLoaderRoute: typeof OrderTrackingOrderIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/restaurant/$restaurantId': {
+      id: '/restaurant/$restaurantId'
+      path: '/restaurant/$restaurantId'
+      fullPath: '/restaurant/$restaurantId'
+      preLoaderRoute: typeof RestaurantRestaurantIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/checkout/': {
+      id: '/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -54,36 +96,67 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/counter': typeof CounterRoute
+  '/order-tracking/$orderId': typeof OrderTrackingOrderIdRoute
+  '/restaurant/$restaurantId': typeof RestaurantRestaurantIdRoute
+  '/checkout': typeof CheckoutIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/counter': typeof CounterRoute
+  '/order-tracking/$orderId': typeof OrderTrackingOrderIdRoute
+  '/restaurant/$restaurantId': typeof RestaurantRestaurantIdRoute
+  '/checkout': typeof CheckoutIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/counter': typeof CounterRoute
+  '/order-tracking/$orderId': typeof OrderTrackingOrderIdRoute
+  '/restaurant/$restaurantId': typeof RestaurantRestaurantIdRoute
+  '/checkout/': typeof CheckoutIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/counter'
+  fullPaths:
+    | '/'
+    | '/counter'
+    | '/order-tracking/$orderId'
+    | '/restaurant/$restaurantId'
+    | '/checkout'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/counter'
-  id: '__root__' | '/' | '/counter'
+  to:
+    | '/'
+    | '/counter'
+    | '/order-tracking/$orderId'
+    | '/restaurant/$restaurantId'
+    | '/checkout'
+  id:
+    | '__root__'
+    | '/'
+    | '/counter'
+    | '/order-tracking/$orderId'
+    | '/restaurant/$restaurantId'
+    | '/checkout/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CounterRoute: typeof CounterRoute
+  OrderTrackingOrderIdRoute: typeof OrderTrackingOrderIdRoute
+  RestaurantRestaurantIdRoute: typeof RestaurantRestaurantIdRoute
+  CheckoutIndexRoute: typeof CheckoutIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CounterRoute: CounterRoute,
+  OrderTrackingOrderIdRoute: OrderTrackingOrderIdRoute,
+  RestaurantRestaurantIdRoute: RestaurantRestaurantIdRoute,
+  CheckoutIndexRoute: CheckoutIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,7 +170,10 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/counter"
+        "/counter",
+        "/order-tracking/$orderId",
+        "/restaurant/$restaurantId",
+        "/checkout/"
       ]
     },
     "/": {
@@ -105,6 +181,15 @@ export const routeTree = rootRoute
     },
     "/counter": {
       "filePath": "counter.tsx"
+    },
+    "/order-tracking/$orderId": {
+      "filePath": "order-tracking.$orderId.tsx"
+    },
+    "/restaurant/$restaurantId": {
+      "filePath": "restaurant.$restaurantId.tsx"
+    },
+    "/checkout/": {
+      "filePath": "checkout/index.tsx"
     }
   }
 }
