@@ -4,6 +4,7 @@ import { mockRestaurants, mockMenuItems } from '../data/mockData';
 import { MenuItemCard } from '../components/MenuItemCard';
 import { useCart } from '../providers/CartProvider';
 import { useDialog } from '../providers/DialogProvider';
+import { useSearch } from '../providers/SearchProvider';
 import { Star, Clock, Truck, ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import type { MenuItem, Restaurant } from '../types';
@@ -12,7 +13,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 function RestaurantPage() {
   const { restaurantId } = Route.useParams();
   const navigate = Route.useNavigate();
-  const [searchQuery] = useState('');
+  const { searchQuery } = useSearch();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const restaurant = mockRestaurants.find(r => r.id === restaurantId);
@@ -48,6 +49,7 @@ function RestaurantPage() {
         onCategoryChange={setSelectedCategory}
         filteredItems={filteredItems}
         onNavigateBack={() => navigate({ to: '/' })}
+        searchQuery={searchQuery}
       />
   );
 }
@@ -59,6 +61,7 @@ interface RestaurantContentProps {
   onCategoryChange: (category: string) => void;
   filteredItems: MenuItem[];
   onNavigateBack: () => void;
+  searchQuery: string;
 }
 
 function RestaurantContent({ 
@@ -67,7 +70,8 @@ function RestaurantContent({
   selectedCategory, 
   onCategoryChange, 
   filteredItems,
-  onNavigateBack 
+  onNavigateBack,
+  searchQuery
 }: RestaurantContentProps) {
   const { addToCart } = useCart();
   const { openAddToCartDialog } = useDialog();
@@ -151,7 +155,7 @@ function RestaurantContent({
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">
-              Aucun plat trouvé
+              Aucun plat trouvé{searchQuery && ` pour "${searchQuery}"`}
             </p>
           </div>
         )}

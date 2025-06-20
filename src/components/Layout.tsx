@@ -6,22 +6,20 @@ import { AddToCartDialog } from './AddToCartDialog';
 import { AddressSelectionModal } from './AddressSelectionModal';
 import { useCart } from '../providers/CartProvider';
 import { useDialog } from '../providers/DialogProvider';
+import { useSearch } from '../providers/SearchProvider';
 import type { MenuItem } from '../types';
 
 interface LayoutProps {
   children: ReactNode;
-  searchQuery?: string;
-  onSearchChange?: (query: string) => void;
   deliveryFee?: number;
 }
 
 export const Layout = ({ 
   children, 
-  searchQuery = '', 
-  onSearchChange = () => {}, 
   deliveryFee = 0 
 }: LayoutProps) => {
   const navigate = useNavigate();
+  const { searchQuery, setSearchQuery } = useSearch();
   const {
     cartItems,
     isCartOpen,
@@ -61,7 +59,7 @@ export const Layout = ({
       <Header
         cartItemsCount={getCartItemsCount()}
         searchQuery={searchQuery}
-        onSearchChange={onSearchChange}
+        onSearchChange={setSearchQuery}
         onCartClick={toggleCart}
         selectedAddress={selectedAddress}
       />

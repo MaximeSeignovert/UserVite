@@ -3,11 +3,12 @@ import { useState } from 'react'
 import { mockRestaurants } from '../data/mockData'
 import { RestaurantCard } from '../components/RestaurantCard'
 import { FilterBar } from '../components/FilterBar'
+import { useSearch } from '../providers/SearchProvider'
 import type { SearchFilters } from '../types/index'
 
 function HomePage() {
   const navigate = Route.useNavigate()
-  const [searchQuery] = useState('')
+  const { searchQuery } = useSearch()
   const [filters, setFilters] = useState<SearchFilters>({})
 
   const filteredRestaurants = mockRestaurants.filter(restaurant => {
@@ -58,7 +59,7 @@ function HomePage() {
       {filteredRestaurants.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">
-            Aucun restaurant trouvé pour "{searchQuery}"
+            Aucun restaurant trouvé{searchQuery && ` pour "${searchQuery}"`}
           </p>
         </div>
       )}
