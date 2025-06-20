@@ -8,9 +8,10 @@ import {
   MapPin, 
   Phone, 
   Home,
-  Truck,
+  Bike,
   ChefHat,
-  Package,
+  CookingPot,
+  Utensils,
   Star,
   MessageCircle,
   Navigation,
@@ -102,19 +103,19 @@ function OrderTrackingPage() {
     { 
       key: 'ready', 
       label: 'Prêt', 
-      icon: <Package className="w-4 h-4" />,
+      icon: <CookingPot className="w-4 h-4" />,
       description: 'Commande prête pour la livraison'
     },
     { 
       key: 'on-the-way', 
       label: 'En livraison', 
-      icon: <Truck className="w-4 h-4" />,
+      icon: <Bike className="w-4 h-4" />,
       description: 'En route vers votre adresse'
     },
     { 
       key: 'delivered', 
       label: 'Livrée', 
-      icon: <Star className="w-4 h-4" />,
+      icon: <Utensils className="w-4 h-4" />,
       description: 'Bon appétit !'
     }
   ];
@@ -169,7 +170,7 @@ function OrderTrackingPage() {
         {orderStatus === 'delivered' && (
           <Card className="bg-green-50 border-green-200">
             <CardContent className="p-6 text-center">
-              <Package className="w-8 h-8 text-green-600 mx-auto mb-2" />
+              <Utensils className="w-8 h-8 text-green-600 mx-auto mb-2" />
               <h3 className="text-xl font-semibold text-green-900 mb-1">
                 🎉 Commande livrée !
               </h3>
