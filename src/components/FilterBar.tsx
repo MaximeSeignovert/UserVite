@@ -1,6 +1,6 @@
 import type { SearchFilters, CuisineType } from '../types';
 import { Button } from './ui/button';
-import { Star, Clock, X } from 'lucide-react';
+import { Star, Clock, X, Leaf } from 'lucide-react';
 import { Badge } from './ui/badge';
 
 interface FilterBarProps {
@@ -96,18 +96,8 @@ export const FilterBar = ({ filters, onFiltersChange }: FilterBarProps) => {
             isVegetarian: filters.isVegetarian ? undefined : true
           })}
         >
+          <Leaf className="w-3 h-3" />
           Végétarien
-        </Button>
-
-        <Button
-          variant={filters.isVegetarian ? "default" : "outline"}
-          size="sm"
-          onClick={() => onFiltersChange({
-            ...filters,
-            isVegetarian: filters.isVegetarian ? undefined : true
-          })}
-        >
-          Végan
         </Button>
 
         {/* Séparateur visuel */}

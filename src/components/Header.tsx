@@ -1,10 +1,12 @@
-import { Search, MapPin, ShoppingBag, User, ChevronDown } from 'lucide-react';
+import { Search, MapPin, ShoppingBag, User, ChevronDown, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useDialog } from '../providers/DialogProvider';
-import type { Address } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import { useState } from 'react';
+import type { Address, AuthUser } from '../types';
 
 interface HeaderProps {
   cartItemsCount: number;
@@ -14,6 +16,38 @@ interface HeaderProps {
   selectedAddress?: Address | null;
 }
 
+// Composant Avatar avec fallback
+const UserAvatar = ({ user, size = 'w-8 h-8' }: { user: AuthUser, size?: string }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const getUserInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  if (imageError || !user.profilePicture) {
+    return (
+      <div className={`${size} bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium`}>
+        {getUserInitials(user.name)}
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={user.profilePicture} 
+      alt={user.name} 
+      className={`${size} rounded-full object-cover`}
+      onError={() => setImageError(true)}
+      onLoad={() => setImageError(false)}
+    />
+  );
+};
+
 export const Header = ({ 
   cartItemsCount, 
   searchQuery, 
@@ -22,10 +56,22 @@ export const Header = ({
   selectedAddress 
 }: HeaderProps) => {
   const { openAddressModal } = useDialog();
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const displayAddress = selectedAddress 
     ? `${selectedAddress.street}, ${selectedAddress.city}`
     : 'Sélectionner une adresse';
+
+  const handleLoginClick = () => {
+    navigate({ to: '/auth/login' });
+  };
+
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+  };
 
   return (
     <header className="bg-background shadow-sm border-b sticky top-0 z-50">
@@ -80,10 +126,58 @@ export const Header = ({
 
           {/* Actions utilisateur */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="hidden md:flex">
-              <User className="w-4 h-4 mr-2" />
-              Se connecter
-            </Button>
+            {/* Authentification */}
+            {isAuthenticated && user ? (
+              <div className="relative">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="hidden md:flex items-center gap-2"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                >
+                  <UserAvatar user={user} />
+                  <span className="max-w-24 truncate">{user.name}</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+
+                {/* Menu mobile utilisateur */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="md:hidden"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                >
+                  <UserAvatar user={user} />
+                </Button>
+
+                {/* Menu déroulant utilisateur */}
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border py-2 z-50">
+                    <div className="px-4 py-2 border-b">
+                      <p className="font-medium text-sm">{user.name}</p>
+                      <p className="text-xs text-gray-600">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Se déconnecter
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="hidden md:flex"
+                onClick={handleLoginClick}
+              >
+                <User className="w-4 h-4 mr-2" />
+                Se connecter
+              </Button>
+            )}
             
             <Button 
               variant="outline" 
@@ -102,6 +196,14 @@ export const Header = ({
           </div>
         </div>
       </div>
+
+      {/* Overlay pour fermer le menu utilisateur */}
+      {userMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setUserMenuOpen(false)}
+        />
+      )}
     </header>
   );
 }; 

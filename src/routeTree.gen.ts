@@ -8,121 +8,86 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as CounterRouteImport } from './routes/counter'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as CheckoutIndexRouteImport } from './routes/checkout/index'
+import { Route as RestaurantRestaurantIdRouteImport } from './routes/restaurant.$restaurantId'
+import { Route as OrderTrackingOrderIdRouteImport } from './routes/order-tracking.$orderId'
+import { Route as AuthRegisterRouteImport } from './routes/auth/register'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as CounterImport } from './routes/counter'
-import { Route as IndexImport } from './routes/index'
-import { Route as CheckoutIndexImport } from './routes/checkout/index'
-import { Route as RestaurantRestaurantIdImport } from './routes/restaurant.$restaurantId'
-import { Route as OrderTrackingOrderIdImport } from './routes/order-tracking.$orderId'
-
-// Create/Update Routes
-
-const CounterRoute = CounterImport.update({
+const CounterRoute = CounterRouteImport.update({
   id: '/counter',
   path: '/counter',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const IndexRoute = IndexImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const CheckoutIndexRoute = CheckoutIndexImport.update({
+const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
   id: '/checkout/',
   path: '/checkout/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const RestaurantRestaurantIdRoute = RestaurantRestaurantIdImport.update({
+const RestaurantRestaurantIdRoute = RestaurantRestaurantIdRouteImport.update({
   id: '/restaurant/$restaurantId',
   path: '/restaurant/$restaurantId',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const OrderTrackingOrderIdRoute = OrderTrackingOrderIdImport.update({
+const OrderTrackingOrderIdRoute = OrderTrackingOrderIdRouteImport.update({
   id: '/order-tracking/$orderId',
   path: '/order-tracking/$orderId',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-// Populate the FileRoutesByPath interface
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/counter': {
-      id: '/counter'
-      path: '/counter'
-      fullPath: '/counter'
-      preLoaderRoute: typeof CounterImport
-      parentRoute: typeof rootRoute
-    }
-    '/order-tracking/$orderId': {
-      id: '/order-tracking/$orderId'
-      path: '/order-tracking/$orderId'
-      fullPath: '/order-tracking/$orderId'
-      preLoaderRoute: typeof OrderTrackingOrderIdImport
-      parentRoute: typeof rootRoute
-    }
-    '/restaurant/$restaurantId': {
-      id: '/restaurant/$restaurantId'
-      path: '/restaurant/$restaurantId'
-      fullPath: '/restaurant/$restaurantId'
-      preLoaderRoute: typeof RestaurantRestaurantIdImport
-      parentRoute: typeof rootRoute
-    }
-    '/checkout/': {
-      id: '/checkout/'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutIndexImport
-      parentRoute: typeof rootRoute
-    }
-  }
-}
-
-// Create and export the route tree
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/auth/register',
+  path: '/auth/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/counter': typeof CounterRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/order-tracking/$orderId': typeof OrderTrackingOrderIdRoute
   '/restaurant/$restaurantId': typeof RestaurantRestaurantIdRoute
   '/checkout': typeof CheckoutIndexRoute
 }
-
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/counter': typeof CounterRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/order-tracking/$orderId': typeof OrderTrackingOrderIdRoute
   '/restaurant/$restaurantId': typeof RestaurantRestaurantIdRoute
   '/checkout': typeof CheckoutIndexRoute
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute
+  __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/counter': typeof CounterRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/order-tracking/$orderId': typeof OrderTrackingOrderIdRoute
   '/restaurant/$restaurantId': typeof RestaurantRestaurantIdRoute
   '/checkout/': typeof CheckoutIndexRoute
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/counter'
+    | '/auth/login'
+    | '/auth/register'
     | '/order-tracking/$orderId'
     | '/restaurant/$restaurantId'
     | '/checkout'
@@ -130,6 +95,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/counter'
+    | '/auth/login'
+    | '/auth/register'
     | '/order-tracking/$orderId'
     | '/restaurant/$restaurantId'
     | '/checkout'
@@ -137,60 +104,86 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/counter'
+    | '/auth/login'
+    | '/auth/register'
     | '/order-tracking/$orderId'
     | '/restaurant/$restaurantId'
     | '/checkout/'
   fileRoutesById: FileRoutesById
 }
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CounterRoute: typeof CounterRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
   OrderTrackingOrderIdRoute: typeof OrderTrackingOrderIdRoute
   RestaurantRestaurantIdRoute: typeof RestaurantRestaurantIdRoute
   CheckoutIndexRoute: typeof CheckoutIndexRoute
 }
 
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/counter': {
+      id: '/counter'
+      path: '/counter'
+      fullPath: '/counter'
+      preLoaderRoute: typeof CounterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/': {
+      id: '/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restaurant/$restaurantId': {
+      id: '/restaurant/$restaurantId'
+      path: '/restaurant/$restaurantId'
+      fullPath: '/restaurant/$restaurantId'
+      preLoaderRoute: typeof RestaurantRestaurantIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/order-tracking/$orderId': {
+      id: '/order-tracking/$orderId'
+      path: '/order-tracking/$orderId'
+      fullPath: '/order-tracking/$orderId'
+      preLoaderRoute: typeof OrderTrackingOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/auth/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CounterRoute: CounterRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
   OrderTrackingOrderIdRoute: OrderTrackingOrderIdRoute,
   RestaurantRestaurantIdRoute: RestaurantRestaurantIdRoute,
   CheckoutIndexRoute: CheckoutIndexRoute,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/counter",
-        "/order-tracking/$orderId",
-        "/restaurant/$restaurantId",
-        "/checkout/"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/counter": {
-      "filePath": "counter.tsx"
-    },
-    "/order-tracking/$orderId": {
-      "filePath": "order-tracking.$orderId.tsx"
-    },
-    "/restaurant/$restaurantId": {
-      "filePath": "restaurant.$restaurantId.tsx"
-    },
-    "/checkout/": {
-      "filePath": "checkout/index.tsx"
-    }
-  }
-}
-ROUTE_MANIFEST_END */

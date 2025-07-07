@@ -1,0 +1,88 @@
+classDiagram
+  %% --- Classes existantes ---
+  class Restaurant {
+    +string id
+    +string name
+    +string description
+    +string image
+    +float rating
+    +string deliveryTime
+    +float deliveryFee
+    +string[] cuisine
+    +boolean isOpen
+    +string promo
+  }
+
+  class MenuItem {
+    +string id
+    +string name
+    +string description
+    +float price
+    +string image
+    +string category
+    +boolean isPopular
+    +boolean isVegetarian
+    +boolean isVegan
+  }
+
+  class User {
+    +string id
+    +string name
+    +string email
+    +string phone
+    +Address[] addresses
+    +string[] favoriteRestaurants
+  }
+
+  class Address {
+    +string id
+    +string street
+    +string city
+    +string postalCode
+    +string country
+  }
+
+  %% --- Nouvelles classes ---
+  class Order {
+    +string id
+    +string userId
+    +string restaurantId
+    +OrderItem[] items
+    +float totalPrice
+    +string status
+    +Date createdAt
+  }
+
+  class OrderItem {
+    +string menuItemId
+    +int quantity
+    +float unitPrice
+  }
+
+  class Delivery {
+    +string id
+    +string orderId
+    +string deliveryPersonId
+    +string deliveryAddressId
+    +Date dispatchedAt
+    +Date deliveredAt
+    +string status
+  }
+
+  class DeliveryPerson {
+    +string id
+    +string name
+    +string phone
+    +boolean isAvailable
+  }
+
+  %% --- Relations ---
+  Restaurant "1" --> "*" MenuItem : propose
+  User "1" --> "*" Address : possède
+  User "1" --> "*" Restaurant : favorise
+  User "1" --> "*" Order : passe
+  Order "1" --> "*" OrderItem : contient
+  Order "*" --> "1" Restaurant : commandé chez
+  Delivery "1" --> "1" Order : pour
+  Delivery "*" --> "1" DeliveryPerson : livré par
+  Delivery "1" --> "1" Address : destination

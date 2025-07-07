@@ -32,18 +32,41 @@ export interface CartItem {
   specialInstructions?: string;
 }
 
+// Nouveau type OrderItem basé sur le diagramme de classes
+export interface OrderItem {
+  menuItemId: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+// Type Order mis à jour selon le diagramme de classes
 export interface Order {
   id: string;
-  restaurant: Restaurant;
-  items: CartItem[];
-  subtotal: number;
-  deliveryFee: number;
-  taxes: number;
-  total: number;
+  userId: string;
+  restaurantId: string;
+  items: OrderItem[];
+  totalPrice: number;
   status: OrderStatus;
   createdAt: Date;
-  estimatedDeliveryTime: string;
-  deliveryAddress: Address;
+}
+
+// Nouveau type Delivery selon le diagramme de classes
+export interface Delivery {
+  id: string;
+  orderId: string;
+  deliveryPersonId: string;
+  deliveryAddressId: string;
+  dispatchedAt?: Date;
+  deliveredAt?: Date;
+  status: DeliveryStatus;
+}
+
+// Nouveau type DeliveryPerson selon le diagramme de classes
+export interface DeliveryPerson {
+  id: string;
+  name: string;
+  phone: string;
+  isAvailable: boolean;
 }
 
 export interface Address {
@@ -61,6 +84,7 @@ export interface User {
   phone: string;
   addresses: Address[];
   favoriteRestaurants: string[];
+  profilePicture: string;
 }
 
 export type OrderStatus = 
@@ -70,6 +94,13 @@ export type OrderStatus =
   | 'on-the-way'
   | 'delivered'
   | 'cancelled';
+
+export type DeliveryStatus =
+  | 'pending'
+  | 'dispatched'
+  | 'on-the-way'
+  | 'delivered'
+  | 'failed';
 
 export type CuisineType = 
   | 'french'
@@ -123,4 +154,62 @@ export interface AddressFeature {
     importance: number;
     street?: string;
   };
+}
+
+// Types pour l'authentification
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  addresses: Address[];
+  favoriteRestaurants: string[];
+  profilePicture: string;
+}
+
+export interface AuthState {
+  user: AuthUser | null;
+  token: string | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+}
+
+export interface AuthContextType extends AuthState {
+  login: (credentials: LoginCredentials) => Promise<void>;
+  logout: () => void;
+  register: (userData: RegisterData) => Promise<void>;
+  updateProfile: (userData: Partial<AuthUser>) => Promise<void>;
+}
+
+export interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+}
+
+export interface JWTPayload {
+  sub: string; // user id
+  email: string;
+  name: string;
+  iat: number;
+  exp: number;
+}
+
+// Types pour les API responses
+export interface LoginResponse {
+  user: AuthUser;
+  token: string;
+  refreshToken?: string;
+}
+
+export interface ApiError {
+  message: string;
+  status: number;
+  code?: string;
 } 

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { mockRestaurants, mockMenuItems } from '../data/mockData';
+import { mockRestaurants, mockMenuItems } from '../data/index';
 import { MenuItemCard } from '../components/MenuItemCard';
 import { useCart } from '../providers/CartProvider';
 import { useDialog } from '../providers/DialogProvider';
