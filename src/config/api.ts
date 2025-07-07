@@ -43,22 +43,20 @@ export const getAuthHeaders = (token: string | null) => {
   return headers;
 };
 
-// Types pour les réponses API standardisées
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-  statusCode: number;
-}
-
 // Fonction utilitaire pour gérer les erreurs d'API
-export const handleApiError = (error: any): string => {
-  if (error.response?.data?.message) {
-    return error.response.data.message;
+export const handleApiError = (error: unknown): string => {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const apiError = error as { response?: { data?: { message?: string } } };
+    if (apiError.response?.data?.message) {
+      return apiError.response.data.message;
+    }
   }
-  if (error.message) {
-    return error.message;
+  if (error && typeof error === 'object' && 'message' in error) {
+    const errorWithMessage = error as { message: string };
+    return errorWithMessage.message;
+  }
+  if (typeof error === 'string') {
+    return error;
   }
   return 'Une erreur inattendue est survenue';
 }; 
