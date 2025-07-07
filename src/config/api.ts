@@ -1,18 +1,16 @@
-// Configuration pour l'API backend
+// Configuration pour l'API backend Flask
 export const API_CONFIG = {
-  // URL de base de l'API (à configurer selon l'environnement)
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  // URL de base de l'API Flask sur le port 7283
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://localhost:7283',
   
-  // Endpoints d'authentification
+  // Endpoints d'authentification Flask
   AUTH: {
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
-    REFRESH: '/auth/refresh',
-    LOGOUT: '/auth/logout',
-    PROFILE: '/auth/profile',
+    LOGIN: '/auth/api/auth/login',
+    REGISTER: '/auth/api/auth/register',
+    PROFILE: '/auth/api/auth/profile',
   },
   
-  // Endpoints des ressources
+  // Endpoints des ressources (à adapter selon votre API Flask)
   RESTAURANTS: '/restaurants',
   ORDERS: '/orders',
   USERS: '/users',
@@ -40,10 +38,12 @@ export const getAuthHeaders = (token: string | null) => {
     headers['Authorization'] = `Bearer ${token}`;
   }
   
+  headers['Content-Type'] = 'application/json';
+
   return headers;
 };
 
-// Fonction utilitaire pour gérer les erreurs d'API
+// Fonction utilitaire pour gérer les erreurs d'API Flask
 export const handleApiError = (error: unknown): string => {
   if (error && typeof error === 'object' && 'response' in error) {
     const apiError = error as { response?: { data?: { message?: string } } };

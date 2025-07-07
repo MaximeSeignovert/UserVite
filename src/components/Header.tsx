@@ -32,7 +32,7 @@ const UserAvatar = ({ user, size = 'w-8 h-8' }: { user: AuthUser, size?: string 
   if (imageError || !user.profilePicture) {
     return (
       <div className={`${size} bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium`}>
-        {getUserInitials(user.name)}
+        {getUserInitials(user.username)}
       </div>
     );
   }
@@ -40,7 +40,7 @@ const UserAvatar = ({ user, size = 'w-8 h-8' }: { user: AuthUser, size?: string 
   return (
     <img 
       src={user.profilePicture} 
-      alt={user.name} 
+      alt={user.username} 
       className={`${size} rounded-full object-cover`}
       onError={() => setImageError(true)}
       onLoad={() => setImageError(false)}
@@ -136,7 +136,7 @@ export const Header = ({
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
                   <UserAvatar user={user} />
-                  <span className="max-w-24 truncate">{user.name}</span>
+                  <span className="max-w-24 truncate">{user.username}</span>
                   <ChevronDown className="w-3 h-3" />
                 </Button>
 
@@ -154,7 +154,7 @@ export const Header = ({
                 {userMenuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border py-2 z-50">
                     <div className="px-4 py-2 border-b">
-                      <p className="font-medium text-sm">{user.name}</p>
+                      <p className="font-medium text-sm">{user.username}</p>
                       <p className="text-xs text-gray-600">{user.email}</p>
                     </div>
                     <button

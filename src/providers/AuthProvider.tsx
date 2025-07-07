@@ -6,8 +6,7 @@ import type {
   AuthState, 
   LoginCredentials, 
   RegisterData, 
-  AuthUser, 
-  JWTPayload 
+  AuthUser
 } from '../types/index';
 
 interface AuthProviderProps {
@@ -25,21 +24,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAuthenticated: false,
   });
 
-  // Fonction pour décoder un JWT (simple, pour dev - en prod utiliser une lib)
-  const decodeJWT = (token: string): JWTPayload | null => {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload;
-    } catch {
-      return null;
-    }
-  };
-
   // Fonction pour vérifier si le token est expiré
   const isTokenExpired = (token: string): boolean => {
-    const payload = decodeJWT(token);
-    if (!payload) return true;
-    return Date.now() >= payload.exp * 1000;
+    const decoded = AuthService.decodeJWT(token);
+    if (!decoded) return true;
+    
+    // Décoder le JWT pour vérifier l'expiration
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true;
+    }
   };
 
   // Charger l'utilisateur depuis localStorage au démarrage
@@ -79,12 +75,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const response = await AuthService.login(credentials);
 
+      // Extraire l'ID utilisateur du token et l'ajouter au user
+      const decoded = AuthService.decodeJWT(response.token);
+      const userWithId = {
+        ...response.user,
+        id: decoded?.userId || response.user.id
+      };
+
       // Sauvegarder dans localStorage
       localStorage.setItem(TOKEN_KEY, response.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(response.user));
+      localStorage.setItem(USER_KEY, JSON.stringify(userWithId));
 
       setAuthState({
-        user: response.user,
+        user: userWithId,
         token: response.token,
         isLoading: false,
         isAuthenticated: true,
@@ -99,10 +102,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Fonction de déconnexion
   const logout = async (): Promise<void> => {
     try {
-      // Appeler l'API de déconnexion si on a un token
-      if (authState.token) {
-        await AuthService.logout(authState.token);
-      }
+      // Appeler l'API de déconnexion (nettoyage côté client pour Flask JWT)
+      await AuthService.logout();
     } catch (error) {
       console.warn('Erreur lors de la déconnexion API:', error);
     } finally {
@@ -125,12 +126,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const response = await AuthService.register(userData);
 
+      // Extraire l'ID utilisateur du token et l'ajouter au user
+      const decoded = AuthService.decodeJWT(response.token);
+      const userWithId = {
+        ...response.user,
+        id: decoded?.userId || response.user.id
+      };
+
       // Sauvegarder dans localStorage
       localStorage.setItem(TOKEN_KEY, response.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(response.user));
+      localStorage.setItem(USER_KEY, JSON.stringify(userWithId));
 
       setAuthState({
-        user: response.user,
+        user: userWithId,
         token: response.token,
         isLoading: false,
         isAuthenticated: true,
@@ -151,31 +159,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
 
     try {
-      // En développement, juste mettre à jour localement
-      if (import.meta.env.DEV) {
-        const updatedUser = { ...authState.user, ...userData };
-        
-        // Mettre à jour localStorage
-        localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+      const updatedUser = await AuthService.updateProfile(authState.token, userData);
+      
+      // Mettre à jour localStorage
+      localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
 
-        setAuthState(prev => ({
-          ...prev,
-          user: updatedUser,
-          isLoading: false,
-        }));
-      } else {
-        // En production, appeler l'API
-        const updatedUser = await AuthService.updateProfile(authState.token, userData);
-        
-        // Mettre à jour localStorage
-        localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
-
-        setAuthState(prev => ({
-          ...prev,
-          user: updatedUser,
-          isLoading: false,
-        }));
-      }
+      setAuthState(prev => ({
+        ...prev,
+        user: updatedUser,
+        isLoading: false,
+      }));
 
     } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));

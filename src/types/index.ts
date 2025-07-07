@@ -156,20 +156,21 @@ export interface AddressFeature {
   };
 }
 
-// Types pour l'authentification
+// Types pour l'authentification Flask
 export interface LoginCredentials {
-  email: string;
+  username: string;  // Flask utilise username au lieu d'email
   password: string;
 }
 
 export interface AuthUser {
   id: string;
-  name: string;
+  username: string;  // Ajouté username pour correspondre à l'API Flask
   email: string;
   phone?: string;
   addresses: Address[];
   favoriteRestaurants: string[];
   profilePicture: string;
+  created_at?: string;  // Ajouté pour correspondre à la réponse profile de Flask
 }
 
 export interface AuthState {
@@ -187,7 +188,7 @@ export interface AuthContextType extends AuthState {
 }
 
 export interface RegisterData {
-  name: string;
+  username: string;  // Changé de name à username pour Flask
   email: string;
   password: string;
   phone?: string;
@@ -196,16 +197,22 @@ export interface RegisterData {
 export interface JWTPayload {
   sub: string; // user id
   email: string;
-  name: string;
+  username: string;  // Changé de name à username pour Flask
   iat: number;
   exp: number;
 }
 
 // Types pour les API responses
+// Réponse Flask pour le login
 export interface LoginResponse {
-  user: AuthUser;
-  token: string;
-  refreshToken?: string;
+  access_token: string;  // Flask retourne access_token
+}
+
+// Réponse Flask pour le profil
+export interface ProfileResponse {
+  username: string;
+  email: string;
+  created_at?: string;
 }
 
 export interface ApiResponse<T = unknown> {

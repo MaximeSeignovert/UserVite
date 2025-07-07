@@ -14,8 +14,8 @@ interface LoginFormProps {
 export const LoginForm = ({ onSuccess, onSwitchToRegister }: LoginFormProps) => {
   const { login, isLoading } = useAuth();
   const [credentials, setCredentials] = useState<LoginCredentials>({
-    email: '',
-    password: '',
+    "username": '',
+    "password": '',
   });
   const [errors, setErrors] = useState<Partial<LoginCredentials>>({});
   const [apiError, setApiError] = useState<string>('');
@@ -24,10 +24,10 @@ export const LoginForm = ({ onSuccess, onSwitchToRegister }: LoginFormProps) => 
   const validateForm = (): boolean => {
     const newErrors: Partial<LoginCredentials> = {};
 
-    if (!credentials.email) {
-      newErrors.email = 'L\'email est requis';
-    } else if (!/\S+@\S+\.\S+/.test(credentials.email)) {
-      newErrors.email = 'L\'email n\'est pas valide';
+    if (!credentials.username) {
+      newErrors.username = 'Le nom d\'utilisateur est requis';
+    } else if (credentials.username.length < 3) {
+      newErrors.username = 'Le nom d\'utilisateur doit contenir au moins 3 caractères';
     }
 
     if (!credentials.password) {
@@ -78,8 +78,8 @@ export const LoginForm = ({ onSuccess, onSwitchToRegister }: LoginFormProps) => 
   // Fonction pour remplir les champs avec un utilisateur de test
   const fillTestUser = () => {
     setCredentials({
-      email: 'marie.dupont@email.com',
-      password: 'password123',
+      "username": 'testuser',
+      "password": 'password123',
     });
     setErrors({});
     setApiError('');
@@ -107,25 +107,25 @@ export const LoginForm = ({ onSuccess, onSwitchToRegister }: LoginFormProps) => 
             onClick={fillTestUser}
             className="w-full"
           >
-            Utiliser Marie Dupont (Test)
+            Utiliser testuser (Test)
           </Button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Champ Email */}
+          {/* Champ Username */}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Nom d'utilisateur</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="votre@email.com"
-              value={credentials.email}
-              onChange={handleChange('email')}
-              className={errors.email ? 'border-red-500' : ''}
+              id="username"
+              type="text"
+              placeholder="Votre nom d'utilisateur"
+              value={credentials.username}
+              onChange={handleChange('username')}
+              className={errors.username ? 'border-red-500' : ''}
               disabled={isLoading}
             />
-            {errors.email && (
-              <p className="text-sm text-red-600">{errors.email}</p>
+            {errors.username && (
+              <p className="text-sm text-red-600">{errors.username}</p>
             )}
           </div>
 

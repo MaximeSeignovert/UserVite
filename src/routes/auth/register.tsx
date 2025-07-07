@@ -1,7 +1,12 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { createFileRoute } from '@tanstack/react-router';
 import { useAuth } from '../../contexts/AuthContext';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Card } from '../../components/ui/card';
+import type { RegisterData } from '../../types/index';
 
 export const Route = createFileRoute('/auth/register')({
   component: RegisterPage,
@@ -9,7 +14,15 @@ export const Route = createFileRoute('/auth/register')({
 
 function RegisterPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, register } = useAuth();
+  const [formData, setFormData] = useState<RegisterData>({
+    "username": '',
+    "email": '',
+    "password": '',
+  });
+  const [errors, setErrors] = useState<Partial<RegisterData>>({});
+  const [apiError, setApiError] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Rediriger si déjà connecté
   useEffect(() => {
@@ -17,6 +30,72 @@ function RegisterPage() {
       navigate({ to: '/' });
     }
   }, [isAuthenticated, isLoading, navigate]);
+
+  // Validation du formulaire
+  const validateForm = (): boolean => {
+    const newErrors: Partial<RegisterData> = {};
+
+    if (!formData.username) {
+      newErrors.username = 'Le nom d\'utilisateur est requis';
+    } else if (formData.username.length < 3) {
+      newErrors.username = 'Le nom d\'utilisateur doit contenir au moins 3 caractères';
+    }
+
+    if (!formData.email) {
+      newErrors.email = 'L\'email est requis';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'L\'email n\'est pas valide';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Le mot de passe est requis';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Gestion de la soumission du formulaire
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setApiError('');
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await register(formData);
+      // L'utilisateur est automatiquement connecté après l'inscription
+      navigate({ to: '/' });
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : 'Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Gestion des changements dans les champs
+  const handleChange = (field: keyof RegisterData) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+    
+    // Effacer l'erreur du champ modifié
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: '',
+      }));
+    }
+  };
 
   // Afficher un loader pendant la vérification de l'auth
   if (isLoading) {
@@ -49,19 +128,91 @@ function RegisterPage() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <div className="text-center">
-            <p className="text-gray-600 mb-4">
-              La page d'inscription sera disponible prochainement.
-            </p>
-            <button
-              onClick={() => navigate({ to: '/auth/login' })}
-              className="text-blue-600 hover:text-blue-800 font-medium"
+        <Card className="py-8 px-4 sm:px-10">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Champ Username */}
+            <div>
+              <Label htmlFor="username">Nom d'utilisateur</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="Votre nom d'utilisateur"
+                value={formData.username}
+                onChange={handleChange('username')}
+                className={errors.username ? 'border-red-500' : ''}
+                disabled={isSubmitting}
+              />
+              {errors.username && (
+                <p className="mt-2 text-sm text-red-600">{errors.username}</p>
+              )}
+            </div>
+
+            {/* Champ Email */}
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="votre@email.com"
+                value={formData.email}
+                onChange={handleChange('email')}
+                className={errors.email ? 'border-red-500' : ''}
+                disabled={isSubmitting}
+              />
+              {errors.email && (
+                <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+              )}
+            </div>
+
+            {/* Champ Mot de passe */}
+            <div>
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Choisissez un mot de passe"
+                value={formData.password}
+                onChange={handleChange('password')}
+                className={errors.password ? 'border-red-500' : ''}
+                disabled={isSubmitting}
+              />
+              {errors.password && (
+                <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+              )}
+            </div>
+
+            {/* Erreur API */}
+            {apiError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800">{apiError}</p>
+              </div>
+            )}
+
+            {/* Bouton de soumission */}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting}
             >
-              ← Retour à la connexion
-            </button>
+              {isSubmitting ? 'Création du compte...' : 'Créer mon compte'}
+            </Button>
+          </form>
+
+          {/* Lien vers la connexion */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Déjà un compte ?{' '}
+              <button
+                type="button"
+                onClick={() => navigate({ to: '/auth/login' })}
+                className="text-blue-600 hover:text-blue-800 font-medium"
+                disabled={isSubmitting}
+              >
+                Se connecter
+              </button>
+            </p>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
