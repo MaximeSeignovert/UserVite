@@ -166,6 +166,9 @@ export interface AuthUser {
   id: string;
   username: string;  // Ajouté username pour correspondre à l'API Flask
   email: string;
+  firstname?: string;  // Ajouté pour correspondre aux nouveaux champs
+  lastname?: string;   // Ajouté pour correspondre aux nouveaux champs
+  role?: string;       // Ajouté pour correspondre au rôle utilisateur
   phone?: string;
   addresses: Address[];
   favoriteRestaurants: string[];
@@ -191,6 +194,9 @@ export interface RegisterData {
   username: string;  // Changé de name à username pour Flask
   email: string;
   password: string;
+  firstname: string;  // Nouveau champ requis par l'API
+  lastname: string;   // Nouveau champ requis par l'API
+  role: string;       // Nouveau champ requis par l'API (user ou delivery)
   phone?: string;
 }
 
@@ -212,6 +218,9 @@ export interface LoginResponse {
 export interface ProfileResponse {
   username: string;
   email: string;
+  firstname?: string;
+  lastname?: string;
+  role?: string;
   created_at?: string;
 }
 

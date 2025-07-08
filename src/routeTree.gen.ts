@@ -16,6 +16,7 @@ import { Route as IndexImport } from './routes/index'
 import { Route as CheckoutIndexImport } from './routes/checkout/index'
 import { Route as RestaurantRestaurantIdImport } from './routes/restaurant.$restaurantId'
 import { Route as OrderTrackingOrderIdImport } from './routes/order-tracking.$orderId'
+import { Route as DeliveryDashboardImport } from './routes/delivery/dashboard'
 import { Route as AuthRegisterImport } from './routes/auth/register'
 import { Route as AuthLoginImport } from './routes/auth/login'
 
@@ -48,6 +49,12 @@ const RestaurantRestaurantIdRoute = RestaurantRestaurantIdImport.update({
 const OrderTrackingOrderIdRoute = OrderTrackingOrderIdImport.update({
   id: '/order-tracking/$orderId',
   path: '/order-tracking/$orderId',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DeliveryDashboardRoute = DeliveryDashboardImport.update({
+  id: '/delivery/dashboard',
+  path: '/delivery/dashboard',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -95,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterImport
       parentRoute: typeof rootRoute
     }
+    '/delivery/dashboard': {
+      id: '/delivery/dashboard'
+      path: '/delivery/dashboard'
+      fullPath: '/delivery/dashboard'
+      preLoaderRoute: typeof DeliveryDashboardImport
+      parentRoute: typeof rootRoute
+    }
     '/order-tracking/$orderId': {
       id: '/order-tracking/$orderId'
       path: '/order-tracking/$orderId'
@@ -126,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/counter': typeof CounterRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/order-tracking/$orderId': typeof OrderTrackingOrderIdRoute
   '/restaurant/$restaurantId': typeof RestaurantRestaurantIdRoute
   '/checkout': typeof CheckoutIndexRoute
@@ -136,6 +151,7 @@ export interface FileRoutesByTo {
   '/counter': typeof CounterRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/order-tracking/$orderId': typeof OrderTrackingOrderIdRoute
   '/restaurant/$restaurantId': typeof RestaurantRestaurantIdRoute
   '/checkout': typeof CheckoutIndexRoute
@@ -147,6 +163,7 @@ export interface FileRoutesById {
   '/counter': typeof CounterRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/order-tracking/$orderId': typeof OrderTrackingOrderIdRoute
   '/restaurant/$restaurantId': typeof RestaurantRestaurantIdRoute
   '/checkout/': typeof CheckoutIndexRoute
@@ -159,6 +176,7 @@ export interface FileRouteTypes {
     | '/counter'
     | '/auth/login'
     | '/auth/register'
+    | '/delivery/dashboard'
     | '/order-tracking/$orderId'
     | '/restaurant/$restaurantId'
     | '/checkout'
@@ -168,6 +186,7 @@ export interface FileRouteTypes {
     | '/counter'
     | '/auth/login'
     | '/auth/register'
+    | '/delivery/dashboard'
     | '/order-tracking/$orderId'
     | '/restaurant/$restaurantId'
     | '/checkout'
@@ -177,6 +196,7 @@ export interface FileRouteTypes {
     | '/counter'
     | '/auth/login'
     | '/auth/register'
+    | '/delivery/dashboard'
     | '/order-tracking/$orderId'
     | '/restaurant/$restaurantId'
     | '/checkout/'
@@ -188,6 +208,7 @@ export interface RootRouteChildren {
   CounterRoute: typeof CounterRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  DeliveryDashboardRoute: typeof DeliveryDashboardRoute
   OrderTrackingOrderIdRoute: typeof OrderTrackingOrderIdRoute
   RestaurantRestaurantIdRoute: typeof RestaurantRestaurantIdRoute
   CheckoutIndexRoute: typeof CheckoutIndexRoute
@@ -198,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   CounterRoute: CounterRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  DeliveryDashboardRoute: DeliveryDashboardRoute,
   OrderTrackingOrderIdRoute: OrderTrackingOrderIdRoute,
   RestaurantRestaurantIdRoute: RestaurantRestaurantIdRoute,
   CheckoutIndexRoute: CheckoutIndexRoute,
@@ -217,6 +239,7 @@ export const routeTree = rootRoute
         "/counter",
         "/auth/login",
         "/auth/register",
+        "/delivery/dashboard",
         "/order-tracking/$orderId",
         "/restaurant/$restaurantId",
         "/checkout/"
@@ -233,6 +256,9 @@ export const routeTree = rootRoute
     },
     "/auth/register": {
       "filePath": "auth/register.tsx"
+    },
+    "/delivery/dashboard": {
+      "filePath": "delivery/dashboard.tsx"
     },
     "/order-tracking/$orderId": {
       "filePath": "order-tracking.$orderId.tsx"

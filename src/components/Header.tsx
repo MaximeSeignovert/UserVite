@@ -1,4 +1,4 @@
-import { Search, MapPin, ShoppingBag, User, ChevronDown, LogOut } from 'lucide-react';
+import { Search, MapPin, ShoppingBag, User, ChevronDown, LogOut, Truck } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -20,8 +20,11 @@ interface HeaderProps {
 const UserAvatar = ({ user, size = 'w-8 h-8' }: { user: AuthUser, size?: string }) => {
   const [imageError, setImageError] = useState(false);
 
-  const getUserInitials = (name: string) => {
-    return name
+  const getUserInitials = (user: AuthUser) => {
+    if (user.firstname && user.lastname) {
+      return `${user.firstname[0]}${user.lastname[0]}`.toUpperCase();
+    }
+    return user.username
       .split(' ')
       .map(word => word[0])
       .join('')
@@ -32,7 +35,7 @@ const UserAvatar = ({ user, size = 'w-8 h-8' }: { user: AuthUser, size?: string 
   if (imageError || !user.profilePicture) {
     return (
       <div className={`${size} bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium`}>
-        {getUserInitials(user.username)}
+        {getUserInitials(user)}
       </div>
     );
   }
@@ -126,6 +129,20 @@ export const Header = ({
 
           {/* Actions utilisateur */}
           <div className="flex items-center gap-2">
+            {/* Lien Dashboard Livreur - uniquement pour les livreurs */}
+            {isAuthenticated && user?.role === 'delivery' && (
+              <Link to="/delivery/dashboard">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="hidden md:flex items-center gap-2"
+                >
+                  <Truck className="w-4 h-4" />
+                  Dashboard
+                </Button>
+              </Link>
+            )}
+
             {/* Authentification */}
             {isAuthenticated && user ? (
               <div className="relative">
@@ -136,7 +153,9 @@ export const Header = ({
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
                   <UserAvatar user={user} />
-                  <span className="max-w-24 truncate">{user.username}</span>
+                  <span className="max-w-24 truncate">
+                    {user.firstname ? `${user.firstname} ${user.lastname}` : user.username}
+                  </span>
                   <ChevronDown className="w-3 h-3" />
                 </Button>
 
@@ -154,9 +173,26 @@ export const Header = ({
                 {userMenuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border py-2 z-50">
                     <div className="px-4 py-2 border-b">
-                      <p className="font-medium text-sm">{user.username}</p>
+                      <p className="font-medium text-sm">
+                        {user.firstname ? `${user.firstname} ${user.lastname}` : user.username}
+                      </p>
                       <p className="text-xs text-gray-600">{user.email}</p>
+                      {user.role === 'delivery' && (
+                        <p className="text-xs text-blue-600 font-medium">Livreur</p>
+                      )}
                     </div>
+                    {/* Lien Dashboard mobile pour livreurs */}
+                    {user.role === 'delivery' && (
+                      <Link to="/delivery/dashboard">
+                        <button
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <Truck className="w-4 h-4" />
+                          Dashboard Livreur
+                        </button>
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"

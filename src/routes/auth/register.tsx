@@ -6,7 +6,9 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card } from '../../components/ui/card';
+import { Switch } from '../../components/ui/switch';
 import type { RegisterData } from '../../types/index';
+import { getDefaultRouteForUser } from '../../providers/AuthProvider';
 
 export const Route = createFileRoute('/auth/register')({
   component: RegisterPage,
@@ -14,11 +16,14 @@ export const Route = createFileRoute('/auth/register')({
 
 function RegisterPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, register } = useAuth();
+  const { isAuthenticated, isLoading, register, user } = useAuth();
   const [formData, setFormData] = useState<RegisterData>({
     "username": '',
     "email": '',
     "password": '',
+    "firstname": '',
+    "lastname": '',
+    "role": 'user',
   });
   const [errors, setErrors] = useState<Partial<RegisterData>>({});
   const [apiError, setApiError] = useState<string>('');
@@ -26,10 +31,11 @@ function RegisterPage() {
 
   // Rediriger si déjà connecté
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      navigate({ to: '/' });
+    if (isAuthenticated && !isLoading && user) {
+      const defaultRoute = getDefaultRouteForUser(user);
+      navigate({ to: defaultRoute });
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, user, navigate]);
 
   // Validation du formulaire
   const validateForm = (): boolean => {
@@ -39,6 +45,14 @@ function RegisterPage() {
       newErrors.username = 'Le nom d\'utilisateur est requis';
     } else if (formData.username.length < 3) {
       newErrors.username = 'Le nom d\'utilisateur doit contenir au moins 3 caractères';
+    }
+
+    if (!formData.firstname) {
+      newErrors.firstname = 'Le prénom est requis';
+    }
+
+    if (!formData.lastname) {
+      newErrors.lastname = 'Le nom de famille est requis';
     }
 
     if (!formData.email) {
@@ -71,7 +85,7 @@ function RegisterPage() {
     try {
       await register(formData);
       // L'utilisateur est automatiquement connecté après l'inscription
-      navigate({ to: '/' });
+      // La redirection sera gérée par l'effect au-dessus
     } catch (error) {
       setApiError(error instanceof Error ? error.message : 'Une erreur est survenue');
     } finally {
@@ -95,6 +109,14 @@ function RegisterPage() {
         [field]: '',
       }));
     }
+  };
+
+  // Gestion du switch pour le rôle livreur
+  const handleRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      role: e.target.checked ? 'delivery' : 'user',
+    }));
   };
 
   // Afficher un loader pendant la vérification de l'auth
@@ -130,6 +152,40 @@ function RegisterPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="py-8 px-4 sm:px-10">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Champ Prénom */}
+            <div>
+              <Label htmlFor="firstname">Prénom</Label>
+              <Input
+                id="firstname"
+                type="text"
+                placeholder="Votre prénom"
+                value={formData.firstname}
+                onChange={handleChange('firstname')}
+                className={errors.firstname ? 'border-red-500' : ''}
+                disabled={isSubmitting}
+              />
+              {errors.firstname && (
+                <p className="mt-2 text-sm text-red-600">{errors.firstname}</p>
+              )}
+            </div>
+
+            {/* Champ Nom */}
+            <div>
+              <Label htmlFor="lastname">Nom de famille</Label>
+              <Input
+                id="lastname"
+                type="text"
+                placeholder="Votre nom de famille"
+                value={formData.lastname}
+                onChange={handleChange('lastname')}
+                className={errors.lastname ? 'border-red-500' : ''}
+                disabled={isSubmitting}
+              />
+              {errors.lastname && (
+                <p className="mt-2 text-sm text-red-600">{errors.lastname}</p>
+              )}
+            </div>
+
             {/* Champ Username */}
             <div>
               <Label htmlFor="username">Nom d'utilisateur</Label>
@@ -179,6 +235,26 @@ function RegisterPage() {
               {errors.password && (
                 <p className="mt-2 text-sm text-red-600">{errors.password}</p>
               )}
+            </div>
+
+            {/* Champ Rôle livreur */}
+            <div>
+              <Label htmlFor="isDelivery">Type de compte</Label>
+              <div className="mt-2">
+                <Switch
+                  id="isDelivery"
+                  checked={formData.role === 'delivery'}
+                  onChange={handleRoleChange}
+                  disabled={isSubmitting}
+                  label="Compte livreur"
+                />
+                <p className="text-xs text-gray-600 mt-1">
+                  {formData.role === 'delivery' 
+                    ? 'Vous pourrez accepter des livraisons' 
+                    : 'Compte client standard'
+                  }
+                </p>
+              </div>
             </div>
 
             {/* Erreur API */}

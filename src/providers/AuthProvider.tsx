@@ -16,6 +16,19 @@ interface AuthProviderProps {
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
 
+// Fonction utilitaire pour déterminer la route par défaut selon le rôle
+export const getDefaultRouteForUser = (user: AuthUser | null): string => {
+  if (!user) return '/';
+  
+  switch (user.role) {
+    case 'delivery':
+      return '/delivery/dashboard';
+    case 'user':
+    default:
+      return '/';
+  }
+};
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,

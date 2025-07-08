@@ -89,6 +89,9 @@ export class AuthService {
         id: '', // À extraire du JWT si nécessaire
         username: data.username,
         email: data.email,
+        firstname: data.firstname,
+        lastname: data.lastname,
+        role: data.role,
         created_at: data.created_at,
         addresses: [], // À adapter selon vos besoins
         favoriteRestaurants: [],

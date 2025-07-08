@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { createFileRoute } from '@tanstack/react-router';
 import { LoginForm } from '../../components/LoginForm';
 import { useAuth } from '../../contexts/AuthContext';
+import { getDefaultRouteForUser } from '../../providers/AuthProvider';
 
 export const Route = createFileRoute('/auth/login')({
   component: LoginPage,
@@ -10,18 +11,20 @@ export const Route = createFileRoute('/auth/login')({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   // Rediriger si déjà connecté
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      navigate({ to: '/' });
+    if (isAuthenticated && !isLoading && user) {
+      const defaultRoute = getDefaultRouteForUser(user);
+      navigate({ to: defaultRoute });
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, user, navigate]);
 
   // Fonction appelée après une connexion réussie
   const handleLoginSuccess = () => {
-    navigate({ to: '/' });
+    // On attend que le user soit disponible pour déterminer la route
+    // La redirection sera gérée par l'effect au-dessus
   };
 
   // Fonction pour aller vers la page d'inscription
