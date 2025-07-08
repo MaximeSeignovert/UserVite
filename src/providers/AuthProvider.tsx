@@ -23,6 +23,8 @@ export const getDefaultRouteForUser = (user: AuthUser | null): string => {
   switch (user.role) {
     case 'delivery':
       return '/delivery/dashboard';
+    case 'restaurant':
+      return '/restaurant/dashboard';
     case 'user':
     default:
       return '/';

@@ -6,8 +6,9 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card } from '../../components/ui/card';
-import { Switch } from '../../components/ui/switch';
+import { Select, SelectValue, SelectTrigger, SelectContent, SelectItem } from '../../components/ui/select';
 import type { RegisterData } from '../../types/index';
+import { UserRole } from '../../types/index';
 import { getDefaultRouteForUser } from '../../providers/AuthProvider';
 
 export const Route = createFileRoute('/auth/register')({
@@ -23,7 +24,7 @@ function RegisterPage() {
     "password": '',
     "firstname": '',
     "lastname": '',
-    "role": 'user',
+    "role": UserRole.USER,
   });
   const [errors, setErrors] = useState<Partial<RegisterData>>({});
   const [apiError, setApiError] = useState<string>('');
@@ -111,11 +112,11 @@ function RegisterPage() {
     }
   };
 
-  // Gestion du switch pour le rôle livreur
-  const handleRoleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Gestion du sélecteur de rôle
+  const handleRoleChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      role: e.target.checked ? 'delivery' : 'user',
+      role: value as UserRole,
     }));
   };
 
@@ -237,22 +238,28 @@ function RegisterPage() {
               )}
             </div>
 
-            {/* Champ Rôle livreur */}
+            {/* Champ Type de compte */}
             <div>
-              <Label htmlFor="isDelivery">Type de compte</Label>
+              <Label htmlFor="role">Type de compte</Label>
               <div className="mt-2">
-                <Switch
-                  id="isDelivery"
-                  checked={formData.role === 'delivery'}
-                  onChange={handleRoleChange}
+                <Select
+                  value={formData.role}
+                  onValueChange={handleRoleChange}
                   disabled={isSubmitting}
-                  label="Compte livreur"
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez un type de compte" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={UserRole.USER}>Client</SelectItem>
+                    <SelectItem value={UserRole.DELIVERY}>Livreur</SelectItem>
+                    <SelectItem value={UserRole.RESTAURANT}>Restaurateur</SelectItem>
+                  </SelectContent>
+                </Select>
                 <p className="text-xs text-gray-600 mt-1">
-                  {formData.role === 'delivery' 
-                    ? 'Vous pourrez accepter des livraisons' 
-                    : 'Compte client standard'
-                  }
+                  {formData.role === UserRole.USER && 'Commandez vos repas préférés'}
+                  {formData.role === UserRole.DELIVERY && 'Vous pourrez accepter des livraisons'}
+                  {formData.role === UserRole.RESTAURANT && 'Gérez votre restaurant et vos commandes'}
                 </p>
               </div>
             </div>

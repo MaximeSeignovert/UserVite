@@ -31,6 +31,6 @@ export type {
   Delivery,
   DeliveryPerson,
   OrderStatus,
-  DeliveryStatus,
+  UnifiedOrderStatus,
   CartItem
 } from '../types/index'; 

@@ -1,11 +1,12 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import { UserRole } from '../types/index';
 
 interface RoleGuardProps {
   children: ReactNode;
-  allowedRoles: string[];
+  allowedRoles: UserRole[];
   fallbackPath?: string;
 }
 
@@ -26,7 +27,7 @@ export const RoleGuard = ({
 
     // Si connecté mais pas le bon rôle, rediriger vers fallback
     if (!isLoading && isAuthenticated && user) {
-      const userRole = user.role || 'user';
+      const userRole = user.role || UserRole.USER;
       if (!allowedRoles.includes(userRole)) {
         navigate({ to: fallbackPath });
         return;
@@ -48,7 +49,7 @@ export const RoleGuard = ({
     return null;
   }
 
-  const userRole = user.role || 'user';
+  const userRole = user.role || UserRole.USER;
   if (!allowedRoles.includes(userRole)) {
     return null;
   }

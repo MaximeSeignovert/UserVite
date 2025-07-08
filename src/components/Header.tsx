@@ -1,4 +1,4 @@
-import { Search, MapPin, ShoppingBag, User, ChevronDown, LogOut, Truck } from 'lucide-react';
+import { Search, MapPin, ShoppingBag, User, ChevronDown, LogOut, Truck, ChefHat } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -143,6 +143,20 @@ export const Header = ({
               </Link>
             )}
 
+            {/* Lien Dashboard Restaurateur - uniquement pour les restaurateurs */}
+            {isAuthenticated && user?.role === 'restaurant' && (
+              <Link to="/restaurant/dashboard">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="hidden md:flex items-center gap-2"
+                >
+                  <ChefHat className="w-4 h-4" />
+                  Restaurant
+                </Button>
+              </Link>
+            )}
+
             {/* Authentification */}
             {isAuthenticated && user ? (
               <div className="relative">
@@ -180,6 +194,9 @@ export const Header = ({
                       {user.role === 'delivery' && (
                         <p className="text-xs text-blue-600 font-medium">Livreur</p>
                       )}
+                      {user.role === 'restaurant' && (
+                        <p className="text-xs text-orange-600 font-medium">Restaurateur</p>
+                      )}
                     </div>
                     {/* Lien Dashboard mobile pour livreurs */}
                     {user.role === 'delivery' && (
@@ -190,6 +207,18 @@ export const Header = ({
                         >
                           <Truck className="w-4 h-4" />
                           Dashboard Livreur
+                        </button>
+                      </Link>
+                    )}
+                    {/* Lien Dashboard mobile pour restaurateurs */}
+                    {user.role === 'restaurant' && (
+                      <Link to="/restaurant/dashboard">
+                        <button
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <ChefHat className="w-4 h-4" />
+                          Dashboard Restaurant
                         </button>
                       </Link>
                     )}

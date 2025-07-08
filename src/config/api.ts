@@ -15,6 +15,12 @@ export const API_CONFIG = {
   ORDERS: '/orders',
   USERS: '/users',
   DELIVERY: '/delivery',
+  COMMANDES: {
+    BASE: '/commande/api/commande',
+    ACCEPT: '/commande/api/commande/accept',      // PATCH /api/commande/accept/{id}
+    PREPARE: '/commande/api/commande/prepare',    // PATCH /api/commande/prepare/{id}
+    READY: '/commande/api/commande/ready',        // PATCH /api/commande/ready/{id}
+  },
   
   // Configuration des timeouts
   TIMEOUT: 10000, // 10 secondes

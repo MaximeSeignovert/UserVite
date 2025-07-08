@@ -9,16 +9,16 @@ interface FilterBarProps {
 }
 
 const cuisineTypes: { value: CuisineType; label: string }[] = [
-  { value: 'french', label: 'Française' },
-  { value: 'italian', label: 'Italienne' },
-  { value: 'japanese', label: 'Japonaise' },
-  { value: 'chinese', label: 'Chinoise' },
-  { value: 'indian', label: 'Indienne' },
-  { value: 'mexican', label: 'Mexicaine' },
-  { value: 'american', label: 'Américaine' },
-  { value: 'mediterranean', label: 'Méditerranéenne' },
-  { value: 'thai', label: 'Thaï' },
-  { value: 'vietnamese', label: 'Vietnamienne' }
+  { value: CuisineType.FRENCH, label: 'Française' },
+  { value: CuisineType.ITALIAN, label: 'Italienne' },
+  { value: CuisineType.JAPANESE, label: 'Japonaise' },
+  { value: CuisineType.CHINESE, label: 'Chinoise' },
+  { value: CuisineType.INDIAN, label: 'Indienne' },
+  { value: CuisineType.MEXICAN, label: 'Mexicaine' },
+  { value: CuisineType.AMERICAN, label: 'Américaine' },
+  { value: CuisineType.MEDITERRANEAN, label: 'Méditerranéenne' },
+  { value: CuisineType.THAI, label: 'Thaï' },
+  { value: CuisineType.VIETNAMESE, label: 'Vietnamienne' }
 ];
 
 export const FilterBar = ({ filters, onFiltersChange }: FilterBarProps) => {

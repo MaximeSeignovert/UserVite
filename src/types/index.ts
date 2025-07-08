@@ -1,5 +1,68 @@
 // Types pour l'application Uber Eats
 
+// Types de rôles utilisateur
+// Enums pour les statuts et rôles
+export enum UserRole {
+  USER = 'user',
+  DELIVERY = 'delivery',
+  RESTAURANT = 'restaurant'
+}
+
+// Enum unifié pour tous les statuts de commandes et livraisons
+export enum UnifiedOrderStatus {
+  // Étapes initiales
+  PLACED = 'placed',          // Commande passée par le client
+  PENDING = 'pending',        // En attente de confirmation restaurant
+  
+  // Étapes restaurant
+  CONFIRMED = 'confirmed',    // Confirmée par le restaurant
+  PREPARING = 'preparing',    // En cours de préparation
+  READY = 'ready',            // Prête pour récupération
+  
+  // Étapes livraison
+  ASSIGNED = 'assigned',      // Assignée à un livreur
+  PICKED_UP = 'picked_up',    // Récupérée par le livreur
+  IN_TRANSIT = 'in_transit',  // En transit vers le client
+  ON_THE_WAY = 'on-the-way',  // Alias pour IN_TRANSIT (compatibilité)
+  
+  // Étapes finales
+  DELIVERED = 'delivered',    // Livrée au client
+  
+  // Étapes d'échec
+  CANCELLED = 'cancelled',    // Annulée
+  FAILED = 'failed',          // Échec de livraison
+  
+  // Statut spéciaux
+  DISPATCHED = 'dispatched'   // Expédiée (pour compatibilité)
+}
+
+// Alias de types pour la rétrocompatibilité - seront supprimés progressivement
+export type OrderStatus = UnifiedOrderStatus;
+export type DeliveryStatus = UnifiedOrderStatus;
+export type LivraisonStatus = UnifiedOrderStatus;
+export type RestaurantOrderStatus = UnifiedOrderStatus;
+
+export enum RestaurantPermission {
+  VIEW_ORDERS = 'view_orders',
+  MANAGE_ORDERS = 'manage_orders',
+  MANAGE_MENU = 'manage_menu',
+  VIEW_ANALYTICS = 'view_analytics',
+  MANAGE_RESTAURANT_INFO = 'manage_restaurant_info'
+}
+
+export enum CuisineType {
+  FRENCH = 'french',
+  ITALIAN = 'italian',
+  JAPANESE = 'japanese',
+  CHINESE = 'chinese',
+  INDIAN = 'indian',
+  MEXICAN = 'mexican',
+  AMERICAN = 'american',
+  MEDITERRANEAN = 'mediterranean',
+  THAI = 'thai',
+  VIETNAMESE = 'vietnamese'
+}
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -87,32 +150,7 @@ export interface User {
   profilePicture: string;
 }
 
-export type OrderStatus = 
-  | 'placed'
-  | 'confirmed'
-  | 'preparing'
-  | 'on-the-way'
-  | 'delivered'
-  | 'cancelled';
-
-export type DeliveryStatus =
-  | 'pending'
-  | 'dispatched'
-  | 'on-the-way'
-  | 'delivered'
-  | 'failed';
-
-export type CuisineType = 
-  | 'french'
-  | 'italian'
-  | 'japanese'
-  | 'chinese'
-  | 'indian'
-  | 'mexican'
-  | 'american'
-  | 'mediterranean'
-  | 'thai'
-  | 'vietnamese';
+// Les types sont maintenant définis comme des enums au début du fichier
 
 export interface SearchFilters {
   cuisineType?: CuisineType;
@@ -168,7 +206,7 @@ export interface AuthUser {
   email: string;
   firstname?: string;  // Ajouté pour correspondre aux nouveaux champs
   lastname?: string;   // Ajouté pour correspondre aux nouveaux champs
-  role?: string;       // Ajouté pour correspondre au rôle utilisateur
+  role?: UserRole;       // Changé pour utiliser le type UserRole
   phone?: string;
   addresses: Address[];
   favoriteRestaurants: string[];
@@ -196,7 +234,7 @@ export interface RegisterData {
   password: string;
   firstname: string;  // Nouveau champ requis par l'API
   lastname: string;   // Nouveau champ requis par l'API
-  role: string;       // Nouveau champ requis par l'API (user ou delivery)
+  role: UserRole;       // Changé pour utiliser le type UserRole
   phone?: string;
 }
 
@@ -220,7 +258,7 @@ export interface ProfileResponse {
   email: string;
   firstname?: string;
   lastname?: string;
-  role?: string;
+  role?: UserRole;
   created_at?: string;
 }
 
@@ -236,4 +274,153 @@ export interface ApiError {
   message: string;
   status: number;
   code?: string;
-} 
+}
+
+// Types pour l'API de livraisons
+
+export interface Livreur {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+  isAvailable: boolean;
+  vehicleType?: string;
+  zone?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Livraison {
+  id: string;
+  orderId?: string;
+  restaurantId?: string;
+  customerId?: string;
+  livreurId?: string;
+  status?: LivraisonStatus;
+  pickupAddress?: string;
+  deliveryAddress?: string;
+  customerName?: string;
+  customerPhone?: string;
+  restaurantName: string;
+  totalAmount: number;
+  estimatedTime?: number;
+  actualPickupTime?: string;
+  actualDeliveryTime?: string;
+  notes?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+// LivraisonStatus maintenant défini comme enum au début du fichier
+
+// Types pour les statistiques livreur
+export interface LivreurStats {
+  todayDeliveries: number;
+  totalEarnings: number;
+  averageRating: number;
+  completionRate: number;
+  totalDeliveries: number;
+}
+
+// Types pour les requêtes API
+export interface CreateLivreurRequest {
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+  vehicleType?: string;
+  zone?: string;
+}
+
+export interface UpdateLivreurRequest extends Partial<CreateLivreurRequest> {
+  isAvailable?: boolean;
+}
+
+export interface CreateLivraisonRequest {
+  orderId: string;
+  restaurantId: string;
+  customerId: string;
+  pickupAddress: string;
+  deliveryAddress: string;
+  customerName: string;
+  customerPhone: string;
+  restaurantName: string;
+  totalAmount: number;
+  estimatedTime?: number;
+  notes?: string;
+}
+
+export interface UpdateLivraisonStatusRequest {
+  status: LivraisonStatus;
+  notes?: string;
+}
+
+// Types pour les commandes basés sur le modèle C#
+export interface LigneCommande {
+  produitId: string;
+  quantite: number;
+  prixUnitaire: number; // En centimes pour éviter les problèmes de précision
+}
+
+export interface Commande {
+  id: string; // Guid en string
+  clientId: string;
+  restaurantId: string;
+  dateCréation: string; // ISO date string
+  produits: LigneCommande[];
+  prixTotal: number; // En centimes
+  statut: string; // Statut libre comme dans le modèle C#
+}
+
+// CommandeStatus maintenant défini comme enum au début du fichier
+
+export interface CreateCommandeRequest {
+  clientId: string;
+  restaurantId: string;
+  produits: LigneCommande[];
+  prixTotal: number;
+  statut?: string;
+}
+
+export interface UpdateCommandeRequest {
+  clientId?: string;
+  restaurantId?: string;
+  dateCréation?: string;
+  produits?: LigneCommande[];
+  prixTotal?: number;
+  statut?: string;
+}
+
+// Types pour la création de commande avec détails du panier
+export interface OrderDetails {
+  id?: string;
+  clientId: string;
+  restaurantId: string;
+  cartItems: CartItem[];
+  totalPrice: number; // En euros (sera converti en centimes)
+  deliveryAddress?: Address;
+  paymentMethod?: 'card' | 'cash';
+  status: string;
+  createdAt: string;
+  estimatedDeliveryTime?: number;
+}
+
+// Interface pour les détails complets d'une commande récupérée
+export interface CommandeDetails extends Commande {
+  parsedCartItems: CartItem[]; // CartItems reconstitués depuis LigneCommande
+  totalPriceEuros: number; // Prix en euros pour l'affichage
+  deliveryAddress?: Address;
+}
+
+// Types spécifiques pour les restaurateurs
+export interface RestaurantOwner {
+  id: string;
+  userId: string; // Référence vers l'utilisateur
+  restaurantId: string; // Restaurant géré
+  permissions: RestaurantPermission[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+// RestaurantPermission et RestaurantOrderStatus maintenant définis comme enums au début du fichier 

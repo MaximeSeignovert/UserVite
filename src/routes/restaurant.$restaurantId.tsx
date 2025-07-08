@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { mockRestaurants, mockMenuItems } from '../data/index';
 import { MenuItemCard } from '../components/MenuItemCard';
 import { useCart } from '../providers/CartProvider';
 import { useDialog } from '../providers/DialogProvider';
 import { useSearch } from '../providers/SearchProvider';
+import { useRestaurants } from '../hooks/useRestaurants';
+import { useMenuItems } from '../hooks/useMenuItems';
 import { Star, Clock, Truck, ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import type { MenuItem, Restaurant } from '../types';
@@ -15,9 +16,37 @@ function RestaurantPage() {
   const navigate = Route.useNavigate();
   const { searchQuery } = useSearch();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  
+  const { restaurants, loading: restaurantsLoading, error: restaurantsError } = useRestaurants();
+  const { menuItems, loading: menuLoading, error: menuError } = useMenuItems(restaurantId);
 
-  const restaurant = mockRestaurants.find(r => r.id === restaurantId);
-  const menuItems = mockMenuItems[restaurantId] || [];
+  const restaurant = restaurants.find(r => r.id === restaurantId);
+
+  // Gestion des états de chargement
+  if (restaurantsLoading || menuLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement du restaurant et du menu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Gestion des erreurs
+  if (restaurantsError || menuError) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 text-lg mb-4">
+          Erreur: {restaurantsError || menuError}
+        </p>
+        <Button onClick={() => navigate({ to: '/' })}>
+          Retour à l'accueil
+        </Button>
+      </div>
+    );
+  }
 
   if (!restaurant) {
     return (

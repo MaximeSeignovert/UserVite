@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
+import { useOrder } from '../hooks/useOrder';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { 
@@ -15,7 +16,8 @@ import {
   Star,
   MessageCircle,
   Navigation,
-  User
+  User,
+  ShoppingBag
 } from 'lucide-react';
 
 export const Route = createFileRoute('/order-tracking/$orderId')({
@@ -40,52 +42,50 @@ function OrderTrackingPage() {
   const { orderId } = Route.useParams();
   const { total, restaurant } = Route.useSearch();
   const navigate = useNavigate();
+  const { getOrderById, currentOrder, loading, error } = useOrder();
+
+  console.log("currentOrder",currentOrder);
   
   const [orderStatus, setOrderStatus] = useState<OrderStatus>('confirmed');
-  const [estimatedTime, setEstimatedTime] = useState(35);
-  const [orderTime] = useState(new Date());
-  const [driver, setDriver] = useState<DeliveryDriver | null>(null);
+  const [estimatedTime] = useState(35);
+  const [orderTime, setOrderTime] = useState(new Date());
+  const [driver] = useState<DeliveryDriver | null>(null);
 
-  // Simuler la progression de la commande
+  // Charger les détails de la commande
   useEffect(() => {
-    const timer1 = setTimeout(() => {
-      setOrderStatus('preparing');
-      setEstimatedTime(30);
-    }, 3000);
-
-    const timer2 = setTimeout(() => {
-      setOrderStatus('ready');
-      setEstimatedTime(25);
-    }, 8000);
-
-    const timer3 = setTimeout(() => {
-      setOrderStatus('on-the-way');
-      setEstimatedTime(15);
-      // Assigner un livreur
-      setDriver({
-        name: 'Pierre Dubois',
-        phone: '+33 6 12 34 56 78',
-        rating: 4.8,
-        vehicle: 'Vélo électrique',
-        estimatedArrival: new Date(Date.now() + 15 * 60000).toLocaleTimeString('fr-FR', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        })
-      });
-    }, 12000);
-
-    const timer4 = setTimeout(() => {
-      setOrderStatus('delivered');
-      setEstimatedTime(0);
-    }, 20000);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
+    const loadOrder = async () => {
+      if (orderId) {
+        await getOrderById(orderId);
+      }
     };
-  }, []);
+
+    loadOrder();
+  }, [orderId, getOrderById]);
+
+  // Actualiser la commande toutes les 10 secondes
+  useEffect(() => {
+    if (!orderId) return;
+
+    const interval = setInterval(async () => {
+      try {
+        await getOrderById(orderId);
+      } catch (error) {
+        console.error('Erreur lors de l\'actualisation de la commande:', error);
+      }
+    }, 10000); // 10 secondes
+
+    return () => clearInterval(interval);
+  }, [orderId, getOrderById]);
+
+  // Mettre à jour le statut local basé sur la commande chargée
+  useEffect(() => {
+    if (currentOrder) {
+      setOrderStatus(currentOrder.statut as OrderStatus);
+      // Utiliser la date de création de la commande
+      const createdAt = new Date(currentOrder.dateCréation);
+      setOrderTime(createdAt);
+    }
+  }, [currentOrder]);
 
   const statusSteps = [
     { 
@@ -132,6 +132,47 @@ function OrderTrackingPage() {
     return `${(currentStepIndex / (statusSteps.length - 1)) * 100}%`;
   };
 
+  // Affichage de chargement
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold">Suivi de commande</h1>
+          <p className="text-lg text-muted-foreground">Chargement des détails...</p>
+        </div>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Affichage d'erreur
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold">Suivi de commande</h1>
+          <p className="text-lg text-red-600">Erreur lors du chargement</p>
+        </div>
+        <Card className="bg-red-50 border-red-200">
+          <CardContent className="p-6 text-center">
+            <p className="text-red-800">{error}</p>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="mt-4"
+              variant="outline"
+            >
+              Réessayer
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
@@ -144,7 +185,7 @@ function OrderTrackingPage() {
             Commandé à {orderTime.toLocaleTimeString('fr-FR', { 
               hour: '2-digit', 
               minute: '2-digit' 
-            })} • Total: {total}€
+            })} • Total: {currentOrder?.totalPriceEuros?.toFixed(2) || total}€
           </p>
         </div>
 
@@ -227,6 +268,61 @@ function OrderTrackingPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Détails de la commande */}
+        {currentOrder && currentOrder.parsedCartItems && currentOrder.parsedCartItems.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingBag className="w-5 h-5" />
+                Détails de la commande
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {currentOrder.parsedCartItems.map((item, index) => (
+                <div key={`${item.menuItem.id}-${index}`} className="flex items-start gap-3 pb-3 border-b last:border-b-0">
+                  <img 
+                    src={item.menuItem.image} 
+                    alt={item.menuItem.name}
+                    className="w-16 h-16 rounded object-cover flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium">{item.menuItem.name}</h4>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {item.menuItem.description}
+                    </p>
+                    {item.specialInstructions && (
+                      <p className="text-sm text-blue-600 italic">
+                        Note: {item.specialInstructions}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-sm text-muted-foreground">
+                        Quantité: {item.quantity}
+                      </span>
+                      <span className="text-sm text-muted-foreground">•</span>
+                      <span className="text-sm text-muted-foreground">
+                        Prix unitaire: {item.menuItem.price.toFixed(2)}€
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">
+                      {(item.menuItem.price * item.quantity).toFixed(2)}€
+                    </p>
+                  </div>
+                </div>
+              ))}
+              
+              <div className="pt-4 border-t">
+                <div className="flex justify-between text-lg font-semibold">
+                  <span>Total de la commande</span>
+                  <span>{currentOrder.totalPriceEuros.toFixed(2)}€</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Informations du livreur */}
         {driver && orderStatus === 'on-the-way' && (

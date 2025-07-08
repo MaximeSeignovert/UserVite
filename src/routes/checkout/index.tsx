@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useCart } from '../../providers/CartProvider';
 import { useDialog } from '../../providers/DialogProvider';
+import { useOrder } from '../../hooks/useOrder';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -18,6 +19,7 @@ import {
   Plus,
   Euro
 } from 'lucide-react';
+import { UnifiedOrderStatus } from '@/types';
 
 export const Route = createFileRoute('/checkout/')({
   component: CheckoutPage,
@@ -27,6 +29,7 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const { cartItems, getCartTotal, updateQuantity, clearCart } = useCart();
   const { selectedAddress } = useDialog();
+  const { createOrder, loading: orderLoading, error: orderError, clearError } = useOrder();
   
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash'>('card');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -37,26 +40,48 @@ function CheckoutPage() {
   const total = subtotal + deliveryFee + taxes;
 
   const handlePlaceOrder = async () => {
+    if (!selectedAddress) {
+      return;
+    }
+
     setIsProcessing(true);
+    clearError();
     
-    // Simuler le traitement de la commande
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Créer l'ID de commande
-    const orderId = `UV-${Date.now().toString().slice(-6)}`;
-    
-    // Vider le panier
-    clearCart();
-    
-    // Rediriger vers la page de suivi
-    navigate({ 
-      to: '/order-tracking/$orderId', 
-      params: { orderId },
-      search: { 
-        total: total.toFixed(2),
-        restaurant: 'Restaurant Demo'
+    try {
+      // Créer la commande via l'API
+      const orderDetails = {
+        clientId: '', // Sera rempli automatiquement par le hook
+        restaurantId: 'restaurant-demo-id', // ID du restaurant (à récupérer dynamiquement)
+        cartItems,
+        totalPrice: total,
+        deliveryAddress: selectedAddress,
+        paymentMethod,
+        status: UnifiedOrderStatus.PENDING,
+        createdAt: new Date().toISOString(),
+        estimatedDeliveryTime: 35
+      };
+
+      const newOrder = await createOrder(orderDetails);
+      
+      if (newOrder) {
+        // Vider le panier
+        clearCart();
+        
+        // Rediriger vers la page de suivi avec l'ID réel de la commande
+        navigate({ 
+          to: '/order-tracking/$orderId', 
+          params: { orderId: newOrder.id },
+          search: { 
+            total: total.toFixed(2),
+            restaurant: 'Restaurant Demo'
+          }
+        });
       }
-    });
+    } catch (error) {
+      console.error('Erreur lors de la création de la commande:', error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (cartItems.length === 0) {
@@ -280,11 +305,11 @@ function CheckoutPage() {
 
                 <Button 
                   onClick={handlePlaceOrder}
-                  disabled={isProcessing || !selectedAddress}
+                  disabled={isProcessing || orderLoading || !selectedAddress}
                   className="w-full"
                   size="lg"
                 >
-                  {isProcessing ? (
+                  {(isProcessing || orderLoading) ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                       Traitement en cours...
@@ -301,6 +326,14 @@ function CheckoutPage() {
                   <p className="text-xs text-red-600 text-center">
                     Veuillez sélectionner une adresse de livraison
                   </p>
+                )}
+
+                {orderError && (
+                  <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                    <p className="text-xs text-red-800 text-center">
+                      {orderError}
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
