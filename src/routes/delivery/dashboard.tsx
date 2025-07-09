@@ -11,14 +11,12 @@ import {
   CheckCircle, 
   Truck,
   User,
-  Star,
   Euro,
   RefreshCw
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { DeliveryService } from '../../services/deliveryService';
-import { orderService } from '../../services/orderService';
-import type { Livraison, LivreurStats, Commande } from '../../types/index';
+import type { Livraison } from '../../types/index';
 import { UserRole, UnifiedOrderStatus } from '../../types/index';
 
 export const Route = createFileRoute('/delivery/dashboard')({
@@ -36,15 +34,8 @@ function DeliveryDashboard() {
 function DeliveryDashboardContent() {
   const { user, token } = useAuth();
   const [isAvailable, setIsAvailable] = useState(false);
-  const [deliveryStats] = useState<LivreurStats>({
-    todayDeliveries: 0,
-    totalEarnings: 0,
-    averageRating: 0,
-    completionRate: 0,
-    totalDeliveries: 0
-  });
-  const [availableCommandes, setAvailableCommandes] = useState<Commande[]>([]);
-  const [myLivraisons] = useState<Livraison[]>([]);
+  const [availableLivraisons, setAvailableLivraisons] = useState<Livraison[]>([]);
+  const [myLivraisons, setMyLivraisons] = useState<Livraison[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
@@ -57,17 +48,19 @@ function DeliveryDashboardContent() {
 
   const loadDashboardData = async () => {
     if (!user?.id || !token) return;
-    console.log("loadDashboardData");
     
     setIsLoading(true);
     setError('');
     
     try {
-      // Récupérer toutes les commandes et filtrer celles avec le statut "ready"
-      const allCommandes = await orderService.getCommandes(token);
-      const readyCommandes = allCommandes.filter(commande => commande.statut === UnifiedOrderStatus.READY);
+      // Charger les livraisons disponibles et les livraisons du livreur en parallèle
+      const [availableData, myLivraisonsData] = await Promise.all([
+        DeliveryService.getAvailableLivraisons(token),
+        DeliveryService.getLivraisonsByLivreur(user.id, token)
+      ]);
 
-      setAvailableCommandes(readyCommandes);
+      setAvailableLivraisons(availableData);
+      setMyLivraisons(myLivraisonsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement des données');
       console.error('Erreur dashboard:', err);
@@ -77,47 +70,26 @@ function DeliveryDashboardContent() {
   };
 
   const handleAvailabilityToggle = async () => {
-    if (!user?.id || !token) return;
-    
-    try {
-      const newAvailability = !isAvailable;
-      await DeliveryService.updateLivreur(user.id, { 
-        isAvailable: newAvailability 
-      }, token);
-      setIsAvailable(newAvailability);
-    } catch (err) {
-      setError('Erreur lors de la mise à jour du statut');
-      console.error('Erreur toggle:', err);
-    }
+    // Pour l'instant, on toggle juste le state local
+    // Plus tard, on pourra appeler une API pour mettre à jour le statut
+    setIsAvailable(!isAvailable);
   };
 
-  const handleTakeOrder = (commandeId: string) => {
-    alert(`Prise en charge de la commande ${commandeId}`);
-  };
-
-  const handleUpdateStatus = async (livraisonId: string, newStatus: UnifiedOrderStatus) => {
-    if (!token) return;
-    
-    try {
-      await DeliveryService.updateLivraisonStatus(livraisonId, { 
-        status: newStatus 
-      }, token);
-      // Recharger les données pour refléter les changements
-      await loadDashboardData();
-    } catch (err) {
-      setError('Erreur lors de la mise à jour du statut');
-      console.error('Erreur mise à jour statut:', err);
-    }
+  const handleTakeOrder = (livraisonId: string) => {
+    // Placeholder pour la prise en charge d'une livraison
+    alert(`Prise en charge de la livraison ${livraisonId}`);
+    // TODO: Implémenter la route PATCH pour prendre en charge une livraison
   };
 
   const getStatusColor = (status: UnifiedOrderStatus | undefined) => {
     switch (status) {
-      case 'pending': return 'bg-gray-100 text-gray-800';
-      case 'assigned': return 'bg-blue-100 text-blue-800';
-      case 'picked_up': return 'bg-yellow-100 text-yellow-800';
-      case 'in_transit': return 'bg-purple-100 text-purple-800';
-      case 'delivered': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case UnifiedOrderStatus.PENDING: return 'bg-gray-100 text-gray-800';
+      case UnifiedOrderStatus.CONFIRMED: return 'bg-blue-100 text-blue-800';
+      case UnifiedOrderStatus.PREPARING: return 'bg-yellow-100 text-yellow-800';
+      case UnifiedOrderStatus.READY: return 'bg-green-100 text-green-800';
+      case UnifiedOrderStatus.ON_THE_WAY: return 'bg-purple-100 text-purple-800';
+      case UnifiedOrderStatus.DELIVERED: return 'bg-green-100 text-green-800';
+      case UnifiedOrderStatus.CANCELLED: return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -125,22 +97,23 @@ function DeliveryDashboardContent() {
   const getStatusText = (status: UnifiedOrderStatus | undefined) => {
     switch (status) {
       case UnifiedOrderStatus.PENDING: return 'En attente';
-      case UnifiedOrderStatus.ASSIGNED: return 'Assignée';
-      case UnifiedOrderStatus.PICKED_UP: return 'Récupérée';
-      case UnifiedOrderStatus.IN_TRANSIT: return 'En transit';
+      case UnifiedOrderStatus.CONFIRMED: return 'Confirmée';
+      case UnifiedOrderStatus.PREPARING: return 'En préparation';
+      case UnifiedOrderStatus.READY: return 'Prête';
+      case UnifiedOrderStatus.ON_THE_WAY: return 'En livraison';
       case UnifiedOrderStatus.DELIVERED: return 'Livrée';
       case UnifiedOrderStatus.CANCELLED: return 'Annulée';
       default: return status;
     }
   };
 
-  const getNextStatusAction = (status: UnifiedOrderStatus | undefined) => {
-    switch (status) {
-      case UnifiedOrderStatus.ASSIGNED: return { status: UnifiedOrderStatus.PICKED_UP, text: 'Marquer comme récupérée' };
-      case UnifiedOrderStatus.PICKED_UP: return { status: UnifiedOrderStatus.IN_TRANSIT, text: 'Commencer la livraison' };
-      case UnifiedOrderStatus.IN_TRANSIT: return { status: UnifiedOrderStatus.DELIVERED, text: 'Marquer comme livrée' };
-      default: return null;
-    }
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   if (isLoading) {
@@ -150,7 +123,6 @@ function DeliveryDashboardContent() {
       </div>
     );
   }
-  console.log(myLivraisons);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -224,8 +196,8 @@ function DeliveryDashboardContent() {
                 <Package className="w-6 h-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Livraisons aujourd'hui</p>
-                <p className="text-2xl font-bold text-gray-900">{deliveryStats?.todayDeliveries || 0}</p>
+                <p className="text-sm font-medium text-gray-600">Livraisons disponibles</p>
+                <p className="text-2xl font-bold text-gray-900">{availableLivraisons.length}</p>
               </div>
             </div>
           </Card>
@@ -233,11 +205,11 @@ function DeliveryDashboardContent() {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
-                <Euro className="w-6 h-6 text-green-600" />
+                <Truck className="w-6 h-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Gains du jour</p>
-                <p className="text-2xl font-bold text-gray-900">{(deliveryStats?.totalEarnings || 0)?.toFixed(2)}€</p>
+                <p className="text-sm font-medium text-gray-600">Mes livraisons</p>
+                <p className="text-2xl font-bold text-gray-900">{myLivraisons.length}</p>
               </div>
             </div>
           </Card>
@@ -245,11 +217,13 @@ function DeliveryDashboardContent() {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <Star className="w-6 h-6 text-yellow-600" />
+                <CheckCircle className="w-6 h-6 text-yellow-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Note moyenne</p>
-                <p className="text-2xl font-bold text-gray-900">{(deliveryStats?.averageRating || 0)?.toFixed(1)}/5</p>
+                <p className="text-sm font-medium text-gray-600">Livrées aujourd'hui</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {myLivraisons.filter(l => l.status === UnifiedOrderStatus.DELIVERED).length}
+                </p>
               </div>
             </div>
           </Card>
@@ -257,11 +231,16 @@ function DeliveryDashboardContent() {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-purple-600" />
+                <Euro className="w-6 h-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Taux de réussite</p>
-                <p className="text-2xl font-bold text-gray-900">{(deliveryStats?.completionRate || 0)?.toFixed(0)}%</p>
+                <p className="text-sm font-medium text-gray-600">Gains estimés</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {myLivraisons
+                    .filter(l => l.status === UnifiedOrderStatus.DELIVERED)
+                    .reduce((sum, l) => sum + (l.totalAmount * 0.1), 0)
+                    .toFixed(2)}€
+                </p>
               </div>
             </div>
           </Card>
@@ -269,61 +248,67 @@ function DeliveryDashboardContent() {
 
         {/* Livraisons */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Commandes prêtes */}
+          {/* Livraisons disponibles (à gauche) */}
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Commandes prêtes ({availableCommandes.length})
+              📦 Livraisons disponibles ({availableLivraisons.length})
             </h2>
             <div className="space-y-4 max-h-96 overflow-y-auto">
-              {availableCommandes.length === 0 ? (
+              {availableLivraisons.length === 0 ? (
                 <Card className="p-6">
                   <div className="text-center text-gray-500">
                     <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>Aucune commande prête</p>
-                    <p className="text-sm">Les commandes prêtes apparaîtront ici</p>
+                    <p>Aucune livraison disponible</p>
+                    <p className="text-sm">Les livraisons prêtes apparaîtront ici</p>
                   </div>
                 </Card>
               ) : (
-                availableCommandes.map((commande) => (
-                  <Card key={commande.id} className="p-6">
+                availableLivraisons.map((livraison) => (
+                  <Card key={livraison.id} className="p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h3 className="font-medium text-gray-900">Restaurant #{commande.restaurantId}</h3>
-                        <p className="text-sm text-gray-600">Commande #{commande.id}</p>
+                        <h3 className="font-medium text-gray-900">{livraison.restaurantName}</h3>
+                        <p className="text-sm text-gray-600">Livraison #{livraison.id}</p>
                       </div>
-                      <Badge className="bg-green-100 text-green-800">
-                        Prête
+                      <Badge className={getStatusColor(livraison.status)}>
+                        {getStatusText(livraison.status)}
                       </Badge>
                     </div>
                     
                     <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700">Client #{commande.clientId}</span>
-                      </div>
+                      {livraison.customerName && (
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm text-gray-700">{livraison.customerName}</span>
+                        </div>
+                      )}
+                      
+                      {livraison.deliveryAddress && (
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
+                          <span className="text-sm text-gray-700">{livraison.deliveryAddress}</span>
+                        </div>
+                      )}
                       
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-gray-500" />
                           <span className="text-sm text-gray-700">
-                            {new Date(commande.dateCréation).toLocaleTimeString('fr-FR', { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
+                            {formatDateTime(livraison.created_at)}
                           </span>
                         </div>
-                        <span className="font-medium text-gray-900">{(commande.prixTotal / 100).toFixed(2)}€</span>
+                        <span className="font-medium text-gray-900">{livraison.totalAmount?.toFixed(2)}€</span>
                       </div>
                     </div>
                     
-                    <div className="mt-4 flex gap-2">
+                    <div className="mt-4">
                       <Button 
                         size="sm" 
-                        className="flex-1"
-                        onClick={() => handleTakeOrder(commande.id)}
+                        className="w-full"
+                        onClick={() => handleTakeOrder(livraison.id)}
                       >
                         <Truck className="w-4 h-4 mr-2" />
-                        Prendre la commande
+                        Prendre cette livraison
                       </Button>
                     </div>
                   </Card>
@@ -332,65 +317,68 @@ function DeliveryDashboardContent() {
             </div>
           </div>
 
-          {/* Mes livraisons */}
+          {/* Mes livraisons (à droite) */}
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Mes livraisons ({myLivraisons.length})
+              🚚 Mes livraisons ({myLivraisons.length})
             </h2>
             <div className="space-y-4 max-h-96 overflow-y-auto">
               {myLivraisons.length === 0 ? (
                 <Card className="p-6">
                   <div className="text-center text-gray-500">
-                    <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <Truck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>Aucune livraison assignée</p>
-                    <p className="text-sm">Acceptez des livraisons pour les voir ici</p>
+                    <p className="text-sm">Prenez une livraison pour la voir ici</p>
                   </div>
                 </Card>
               ) : (
-                myLivraisons.map((livraison) => {
-                  const nextAction = getNextStatusAction(livraison.status);
-                  return (
-                    <Card key={livraison.id} className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="font-medium text-gray-900">{livraison.restaurantName}</h3>
-                          <p className="text-sm text-gray-600">Commande #{livraison.orderId}</p>
-                        </div>
-                        <Badge className={getStatusColor(livraison.status)}>
-                          {getStatusText(livraison.status)}
-                        </Badge>
+                myLivraisons.map((livraison) => (
+                  <Card key={livraison.id} className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="font-medium text-gray-900">{livraison.restaurantName}</h3>
+                        <p className="text-sm text-gray-600">Livraison #{livraison.id}</p>
                       </div>
-                      
-                      <div className="space-y-3">
+                      <Badge className={getStatusColor(livraison.status)}>
+                        {getStatusText(livraison.status)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {livraison.customerName && (
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-gray-500" />
                           <span className="text-sm text-gray-700">{livraison.customerName}</span>
                         </div>
-                        
+                      )}
+                      
+                      {livraison.deliveryAddress && (
                         <div className="flex items-start gap-2">
                           <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
                           <span className="text-sm text-gray-700">{livraison.deliveryAddress}</span>
                         </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-gray-900">{livraison.totalAmount?.toFixed(2)}€</span>
-                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between">
+                        {livraison.actualPickupTime && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm text-gray-700">
+                              Récupérée: {formatDateTime(livraison.actualPickupTime)}
+                            </span>
+                          </div>
+                        )}
+                        <span className="font-medium text-gray-900">{livraison.totalAmount?.toFixed(2)}€</span>
                       </div>
                       
-                      {nextAction && (
-                        <div className="mt-4">
-                          <Button 
-                            size="sm" 
-                            className="w-full"
-                            onClick={() => handleUpdateStatus(livraison.id, nextAction.status)}
-                          >
-                            {nextAction.text}
-                          </Button>
+                      {livraison.notes && (
+                        <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                          <strong>Notes:</strong> {livraison.notes}
                         </div>
                       )}
-                    </Card>
-                  );
-                })
+                    </div>
+                  </Card>
+                ))
               )}
             </div>
           </div>

@@ -11,19 +11,15 @@ export enum UserRole {
 // Enum unifié pour tous les statuts de commandes et livraisons
 export enum UnifiedOrderStatus {
   // Étapes initiales
-  PLACED = 'placed',          // Commande passée par le client
   PENDING = 'pending',        // En attente de confirmation restaurant
   
   // Étapes restaurant
   CONFIRMED = 'confirmed',    // Confirmée par le restaurant
   PREPARING = 'preparing',    // En cours de préparation
-  READY = 'ready',            // Prête pour récupération
+  READY = 'ready',           // Prête pour récupération
   
   // Étapes livraison
-  ASSIGNED = 'assigned',      // Assignée à un livreur
-  PICKED_UP = 'picked_up',    // Récupérée par le livreur
-  IN_TRANSIT = 'in_transit',  // En transit vers le client
-  ON_THE_WAY = 'on-the-way',  // Alias pour IN_TRANSIT (compatibilité)
+  ON_THE_WAY = 'on-the-way',  // En cours de livraison
   
   // Étapes finales
   DELIVERED = 'delivered',    // Livrée au client
@@ -31,9 +27,6 @@ export enum UnifiedOrderStatus {
   // Étapes d'échec
   CANCELLED = 'cancelled',    // Annulée
   FAILED = 'failed',          // Échec de livraison
-  
-  // Statut spéciaux
-  DISPATCHED = 'dispatched'   // Expédiée (pour compatibilité)
 }
 
 // Alias de types pour la rétrocompatibilité - seront supprimés progressivement

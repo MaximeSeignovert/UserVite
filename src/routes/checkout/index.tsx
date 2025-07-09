@@ -56,9 +56,9 @@ function CheckoutPage() {
         totalPrice: total,
         deliveryAddress: selectedAddress,
         paymentMethod,
-        status: UnifiedOrderStatus.PENDING,
+        status: UnifiedOrderStatus.PENDING, // Commande créée en attente de confirmation du restaurant
         createdAt: new Date().toISOString(),
-        estimatedDeliveryTime: 35
+        estimatedDeliveryTime: Math.floor(Math.random() * 20) + 15
       };
 
       const newOrder = await createOrder(orderDetails);

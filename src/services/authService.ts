@@ -6,6 +6,7 @@ import type {
   LoginResponse,
   ProfileResponse
 } from '../types/index';
+import { UserRole } from '../types/index';
 
 // Service d'authentification pour Flask
 export class AuthService {
@@ -40,11 +41,21 @@ export class AuthService {
   // Inscription utilisateur avec Flask
   static async register(userData: RegisterData): Promise<{ user: AuthUser; token: string }> {
     try {
-      const response = await fetch(buildApiUrl(API_CONFIG.AUTH.REGISTER), {
+
+      let response;
+      if (userData.role === UserRole.DELIVERY) {
+        response = await fetch(buildApiUrl(API_CONFIG.AUTH.REGISTER_LIVREUR), {
+          method: 'POST',
+          headers: getAuthHeaders(null),
+          body: JSON.stringify(userData),
+        });
+      }else{
+        response = await fetch(buildApiUrl(API_CONFIG.AUTH.REGISTER), {
         method: 'POST',
         headers: getAuthHeaders(null),
         body: JSON.stringify(userData),
       });
+    }
 
       if (!response.ok) {
         const errorData = await response.json();

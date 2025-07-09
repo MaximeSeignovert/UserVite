@@ -7,6 +7,7 @@ export const API_CONFIG = {
   AUTH: {
     LOGIN: '/auth/api/auth/login',
     REGISTER: '/auth/api/auth/register',
+    REGISTER_LIVREUR: '/gateway/RegisterLivreur',
     PROFILE: '/auth/api/auth/profile',
   },
   

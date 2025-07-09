@@ -1,4 +1,4 @@
-import type { SearchFilters, CuisineType } from '../types';
+import { type SearchFilters, CuisineType } from '../types';
 import { Button } from './ui/button';
 import { Star, Clock, X, Leaf } from 'lucide-react';
 import { Badge } from './ui/badge';

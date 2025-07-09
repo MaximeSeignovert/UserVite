@@ -11,7 +11,6 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as CounterImport } from './routes/counter'
 import { Route as IndexImport } from './routes/index'
 import { Route as CheckoutIndexImport } from './routes/checkout/index'
 import { Route as RestaurantDashboardImport } from './routes/restaurant/dashboard'
@@ -23,12 +22,6 @@ import { Route as AuthLoginImport } from './routes/auth/login'
 import { Route as RestaurantOrderTrackingOrderIdImport } from './routes/restaurant/order-tracking.$orderId'
 
 // Create/Update Routes
-
-const CounterRoute = CounterImport.update({
-  id: '/counter',
-  path: '/counter',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
@@ -96,13 +89,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/counter': {
-      id: '/counter'
-      path: '/counter'
-      fullPath: '/counter'
-      preLoaderRoute: typeof CounterImport
-      parentRoute: typeof rootRoute
-    }
     '/auth/login': {
       id: '/auth/login'
       path: '/auth/login'
@@ -166,7 +152,6 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/counter': typeof CounterRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
@@ -179,7 +164,6 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/counter': typeof CounterRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
@@ -193,7 +177,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/counter': typeof CounterRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
@@ -208,7 +191,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/counter'
     | '/auth/login'
     | '/auth/register'
     | '/delivery/dashboard'
@@ -220,7 +202,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/counter'
     | '/auth/login'
     | '/auth/register'
     | '/delivery/dashboard'
@@ -232,7 +213,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/counter'
     | '/auth/login'
     | '/auth/register'
     | '/delivery/dashboard'
@@ -246,7 +226,6 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CounterRoute: typeof CounterRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   DeliveryDashboardRoute: typeof DeliveryDashboardRoute
@@ -259,7 +238,6 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CounterRoute: CounterRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   DeliveryDashboardRoute: DeliveryDashboardRoute,
@@ -281,7 +259,6 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/counter",
         "/auth/login",
         "/auth/register",
         "/delivery/dashboard",
@@ -294,9 +271,6 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
-    },
-    "/counter": {
-      "filePath": "counter.tsx"
     },
     "/auth/login": {
       "filePath": "auth/login.tsx"
