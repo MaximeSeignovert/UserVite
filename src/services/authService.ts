@@ -47,7 +47,10 @@ export class AuthService {
         response = await fetch(buildApiUrl(API_CONFIG.AUTH.REGISTER_LIVREUR), {
           method: 'POST',
           headers: getAuthHeaders(null),
-          body: JSON.stringify(userData),
+          body: JSON.stringify({
+            ...userData,
+            telephone: '+33123456789'
+          }),
         });
       }else{
         response = await fetch(buildApiUrl(API_CONFIG.AUTH.REGISTER), {

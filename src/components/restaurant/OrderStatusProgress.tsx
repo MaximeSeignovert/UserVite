@@ -4,7 +4,6 @@ import {
   Clock, 
   ChefHat,
   CookingPot,
-  Bike,
   XCircle
 } from 'lucide-react';
 import { UnifiedOrderStatus } from '../../types/index';
@@ -50,13 +49,6 @@ const statusSteps: StatusStep[] = [
     description: 'Commande prête pour récupération',
     color: 'bg-green-500'
   },
-  { 
-    key: UnifiedOrderStatus.PICKED_UP, 
-    label: 'Récupérée', 
-    icon: <Bike className="w-4 h-4" />,
-    description: 'Récupérée par le livreur',
-    color: 'bg-purple-500'
-  }
 ];
 
 export const OrderStatusProgress = ({ currentStatus }: OrderStatusProgressProps) => {

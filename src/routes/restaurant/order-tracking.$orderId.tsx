@@ -7,7 +7,8 @@ import { RoleGuard } from '../../components/RoleGuard';
 import { useAuth } from '../../contexts/AuthContext';
 import { orderService } from '../../services/orderService';
 import { ArrowLeft } from 'lucide-react';
-import { RestaurantOrderStatus, UserRole } from '../../types/index';
+import { UserRole } from '../../types/index';
+import { type RestaurantOrderStatus } from '../../types/index';
 import { 
   OrderStatusProgress,
   OrderActions,
@@ -67,9 +68,6 @@ function RestaurantOrderTrackingPage() {
           setEstimatedTime(10);
           break;
         case 'cancelled':
-        case 'picked_up':
-          setEstimatedTime(0);
-          break;
         default:
           setEstimatedTime(35);
           break;

@@ -26,6 +26,8 @@ function RestaurantDashboard() {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [updatingOrders, setUpdatingOrders] = useState<Set<string>>(new Set());
 
+  console.log("orders", orders);
+
   // Charger les commandes du restaurant depuis l'API
   useEffect(() => {
     loadRestaurantOrders();
@@ -99,8 +101,10 @@ function RestaurantDashboard() {
         return 'En préparation';
       case UnifiedOrderStatus.READY:
         return 'Prête';
-      case UnifiedOrderStatus.PICKED_UP:
-        return 'Récupérée';
+      case UnifiedOrderStatus.ON_THE_WAY:
+        return 'En cours de livraison';
+      case UnifiedOrderStatus.DELIVERED:
+        return 'Livrée';
       case UnifiedOrderStatus.CANCELLED:
         return 'Annulée';
       default:

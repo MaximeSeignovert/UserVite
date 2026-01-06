@@ -21,6 +21,8 @@ export const API_CONFIG = {
     ACCEPT: '/commande/api/commande/accept',      // PATCH /api/commande/accept/{id}
     PREPARE: '/commande/api/commande/prepare',    // PATCH /api/commande/prepare/{id}
     READY: '/commande/api/commande/ready',        // PATCH /api/commande/ready/{id}
+    ON_THE_WAY: '/commande/api/commande/onTheWay', // PATCH /api/commande/on_the_way/{id}
+    DELIVER: '/commande/api/commande/deliver',   // PATCH /api/commande/delivered/{id}
   },
   
   // Configuration des timeouts

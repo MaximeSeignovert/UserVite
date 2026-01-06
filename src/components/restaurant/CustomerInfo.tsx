@@ -20,8 +20,8 @@ export const CustomerInfo = ({ order, orderStatus }: CustomerInfoProps) => {
         return UnifiedOrderStatus.PREPARING;
       case UnifiedOrderStatus.READY:
         return UnifiedOrderStatus.READY;
-      case UnifiedOrderStatus.PICKED_UP:
-        return UnifiedOrderStatus.PICKED_UP;
+      case UnifiedOrderStatus.ON_THE_WAY:
+        return UnifiedOrderStatus.ON_THE_WAY;
       case UnifiedOrderStatus.CANCELLED:
         return UnifiedOrderStatus.CANCELLED;
       default:
@@ -38,8 +38,6 @@ export const CustomerInfo = ({ order, orderStatus }: CustomerInfoProps) => {
       case UnifiedOrderStatus.PREPARING:
         return 'default';
       case UnifiedOrderStatus.READY:
-        return 'outline';
-      case UnifiedOrderStatus.PICKED_UP:
         return 'outline';
       case UnifiedOrderStatus.CANCELLED:
         return 'destructive';

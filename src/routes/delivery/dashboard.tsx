@@ -12,12 +12,13 @@ import {
   Truck,
   User,
   Euro,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { DeliveryService } from '../../services/deliveryService';
 import type { Livraison } from '../../types/index';
 import { UserRole, UnifiedOrderStatus } from '../../types/index';
+import { orderService } from '../../services/orderService';
 
 export const Route = createFileRoute('/delivery/dashboard')({
   component: DeliveryDashboard,
@@ -56,7 +57,7 @@ function DeliveryDashboardContent() {
       // Charger les livraisons disponibles et les livraisons du livreur en parallèle
       const [availableData, myLivraisonsData] = await Promise.all([
         DeliveryService.getAvailableLivraisons(token),
-        DeliveryService.getLivraisonsByLivreur(user.id, token)
+        DeliveryService.getOnTheWayOrders(token)
       ]);
 
       setAvailableLivraisons(availableData);
@@ -75,10 +76,24 @@ function DeliveryDashboardContent() {
     setIsAvailable(!isAvailable);
   };
 
-  const handleTakeOrder = (livraisonId: string) => {
-    // Placeholder pour la prise en charge d'une livraison
-    alert(`Prise en charge de la livraison ${livraisonId}`);
-    // TODO: Implémenter la route PATCH pour prendre en charge une livraison
+  const handleTakeOrder = async (livraisonId: string) => {
+    try {
+      await orderService.onTheWayCommande(livraisonId, token);
+      // Actualiser les données après l'action
+      await loadDashboardData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la prise de commande');
+    }
+  };
+
+  const handleDeliverOrder = async (livraisonId: string) => {
+    try {
+      await orderService.deliveredCommande(livraisonId, token);
+      // Actualiser les données après l'action
+      await loadDashboardData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la livraison');
+    }
   };
 
   const getStatusColor = (status: UnifiedOrderStatus | undefined) => {
@@ -376,6 +391,17 @@ function DeliveryDashboardContent() {
                           <strong>Notes:</strong> {livraison.notes}
                         </div>
                       )}
+                    </div>
+                    
+                    <div className="mt-4">
+                      <Button 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => handleDeliverOrder(livraison.id)}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Marquer comme livrée
+                      </Button>
                     </div>
                   </Card>
                 ))

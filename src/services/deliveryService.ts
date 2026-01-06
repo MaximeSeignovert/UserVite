@@ -10,7 +10,8 @@ const DELIVERY_ENDPOINTS = {
   LIVREUR_BY_ID: (id: string) => `/livraison/livreurs/${id}`,
   
   // Routes livraisons
-  LIVRAISONS_AVAILABLE: '/livraison/livraisons/available',
+  LIVRAISONS_AVAILABLE: '/commande/api/commande/accepted',
+  LIVRAISONS_ON_THE_WAY: '/commande/api/commande/onTheWay',
   LIVRAISON_BY_ID: (livraisonId: string) => `/livraison/livraisons/${livraisonId}`,
   LIVREUR_LIVRAISONS: (livreurId: string) => `/livraison/livreur/${livreurId}/livraisons`,
 };
@@ -59,6 +60,29 @@ export class DeliveryService {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Erreur lors de la récupération des livraisons disponibles');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw new Error(handleApiError(error));
+    }
+  }
+
+  /**
+   * Obtenir les livraisons livrées par un livreur
+   * Utilisé dans le dashboard livreur pour afficher les livraisons livrées
+   * Correspond à : GET /livraisons/delivered
+   */
+  static async getOnTheWayOrders(token: string): Promise<Livraison[]> {
+    try {
+      const response = await fetch(buildApiUrl(DELIVERY_ENDPOINTS.LIVRAISONS_ON_THE_WAY), {
+        method: 'GET',
+        headers: getAuthHeaders(token),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erreur lors de la récupération des livraisons livrées du livreur`);
       }
 
       return await response.json();

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { productService, type Restaurant as ApiRestaurant } from '../services/productService';
 import type { Restaurant } from '../types';
+import { mockRestaurants } from '../data/mockRestaurants';
 
 // Fonction pour mapper les données API vers le format frontend
 const mapApiRestaurantToFrontend = (apiRestaurant: ApiRestaurant): Restaurant => {
@@ -36,17 +37,31 @@ export const useRestaurants = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMockData, setIsMockData] = useState(false);
 
   const fetchRestaurants = async () => {
     try {
       setLoading(true);
       setError(null);
+      setIsMockData(false);
       const apiRestaurants = await productService.getRestaurants();
+      
+      // Fallback vers les données mockées si l'API retourne un tableau vide
+      if (!apiRestaurants || apiRestaurants.length === 0) {
+        console.warn('API a retourné un tableau vide, utilisation des données mockées');
+        setRestaurants(mockRestaurants);
+        setIsMockData(true);
+        return;
+      }
+      
       const mappedRestaurants = apiRestaurants.map(mapApiRestaurantToFrontend);
       setRestaurants(mappedRestaurants);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des restaurants');
-      console.error('Erreur lors du chargement des restaurants:', err);
+      // Fallback vers les données mockées en cas d'erreur API
+      console.warn('Erreur API, utilisation des données mockées:', err);
+      setRestaurants(mockRestaurants);
+      setIsMockData(true);
+      setError(null); // On efface l'erreur car on a les données mockées
     } finally {
       setLoading(false);
     }
@@ -60,6 +75,7 @@ export const useRestaurants = () => {
     restaurants,
     loading,
     error,
+    isMockData,
     refetch: fetchRestaurants
   };
 }; 

@@ -1,4 +1,5 @@
 import type { Order, OrderItem } from '../types/index';
+import { UnifiedOrderStatus } from '../types/index';
 
 export const mockOrderItems: OrderItem[] = [
   // Items pour la commande 1
@@ -65,7 +66,7 @@ export const mockOrders: Order[] = [
     restaurantId: '1',
     items: [mockOrderItems[0], mockOrderItems[1]], // Coq au Vin + 2 Crème Brûlée
     totalPrice: 33.50, // 18.50 + (2 * 7.50)
-    status: 'delivered',
+    status: UnifiedOrderStatus.DELIVERED,
     createdAt: new Date('2024-01-15T12:30:00Z')
   },
   {
@@ -74,7 +75,7 @@ export const mockOrders: Order[] = [
     restaurantId: '2',
     items: [mockOrderItems[2], mockOrderItems[3]], // 2 Pizza Margherita + Tiramisu
     totalPrice: 34.50, // (2 * 14.00) + 6.50
-    status: 'on-the-way',
+    status: UnifiedOrderStatus.ON_THE_WAY,
     createdAt: new Date('2024-01-15T19:45:00Z')
   },
   {
@@ -83,7 +84,7 @@ export const mockOrders: Order[] = [
     restaurantId: '3',
     items: [mockOrderItems[4], mockOrderItems[5]], // Plateau Sashimi + 2 Maki California
     totalPrice: 41.00, // 24.00 + (2 * 8.50)
-    status: 'preparing',
+    status: UnifiedOrderStatus.PREPARING,
     createdAt: new Date('2024-01-15T20:15:00Z')
   },
   {
@@ -92,7 +93,7 @@ export const mockOrders: Order[] = [
     restaurantId: '4',
     items: [mockOrderItems[6], mockOrderItems[7]], // Classic Burger + Frites
     totalPrice: 17.00, // 12.50 + 4.50
-    status: 'confirmed',
+    status: UnifiedOrderStatus.CONFIRMED,
     createdAt: new Date('2024-01-15T18:20:00Z')
   },
   {
@@ -101,7 +102,7 @@ export const mockOrders: Order[] = [
     restaurantId: '6',
     items: [mockOrderItems[8], mockOrderItems[9]], // Buddha Bowl + Smoothie Bowl
     totalPrice: 22.00, // 13.50 + 8.50
-    status: 'placed',
+    status: UnifiedOrderStatus.PENDING,
     createdAt: new Date('2024-01-15T21:00:00Z')
   },
   {
@@ -121,7 +122,7 @@ export const mockOrders: Order[] = [
       }
     ],
     totalPrice: 34.00, // (3 * 9.50) + 5.50
-    status: 'cancelled',
+    status: UnifiedOrderStatus.CANCELLED,
     createdAt: new Date('2024-01-14T16:30:00Z')
   }
 ]; 

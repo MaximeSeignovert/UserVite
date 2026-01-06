@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { productService, type Produit } from '../services/productService';
 import type { MenuItem } from '../types';
+import { mockMenuItems } from '../data/mockMenuItems';
 
 // Fonction pour mapper les données API vers le format frontend
 const mapApiProduitToMenuItem = (produit: Produit): MenuItem => {
@@ -36,10 +37,17 @@ const mapApiProduitToMenuItem = (produit: Produit): MenuItem => {
   };
 };
 
+// Fonction helper pour récupérer les données mockées d'un restaurant
+const getMockMenuItemsForRestaurant = (restaurantId: string | number): MenuItem[] => {
+  const id = restaurantId.toString();
+  return mockMenuItems[id] || [];
+};
+
 export const useMenuItems = (restaurantId: string | number) => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMockData, setIsMockData] = useState(false);
 
   const fetchMenuItems = async () => {
     if (!restaurantId) {
@@ -51,13 +59,35 @@ export const useMenuItems = (restaurantId: string | number) => {
     try {
       setLoading(true);
       setError(null);
+      setIsMockData(false);
       const numericRestaurantId = typeof restaurantId === 'string' ? parseInt(restaurantId) : restaurantId;
       const produits = await productService.getProduitsByRestaurantId(numericRestaurantId);
+      
+      // Fallback vers les données mockées si l'API retourne un tableau vide
+      if (!produits || produits.length === 0) {
+        const mockItems = getMockMenuItemsForRestaurant(restaurantId);
+        if (mockItems.length > 0) {
+          console.warn('API a retourné un tableau vide, utilisation des données mockées pour le restaurant:', restaurantId);
+          setMenuItems(mockItems);
+          setIsMockData(true);
+          return;
+        }
+      }
+      
       const mappedMenuItems = produits.map(mapApiProduitToMenuItem);
       setMenuItems(mappedMenuItems);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des produits');
-      console.error('Erreur lors du chargement des produits:', err);
+      // Fallback vers les données mockées en cas d'erreur API
+      const mockItems = getMockMenuItemsForRestaurant(restaurantId);
+      if (mockItems.length > 0) {
+        console.warn('Erreur API, utilisation des données mockées pour le restaurant:', restaurantId, err);
+        setMenuItems(mockItems);
+        setIsMockData(true);
+        setError(null); // On efface l'erreur car on a les données mockées
+      } else {
+        setError(err instanceof Error ? err.message : 'Erreur lors du chargement des produits');
+        console.error('Erreur lors du chargement des produits:', err);
+      }
     } finally {
       setLoading(false);
     }
@@ -71,6 +101,7 @@ export const useMenuItems = (restaurantId: string | number) => {
     menuItems,
     loading,
     error,
+    isMockData,
     refetch: fetchMenuItems
   };
 };

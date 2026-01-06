@@ -107,7 +107,7 @@ function OrderTrackingPage() {
       description: 'Commande prête pour la livraison'
     },
     { 
-      key: 'on-the-way', 
+      key: 'onTheWay', 
       label: 'En livraison', 
       icon: <Bike className="w-4 h-4" />,
       description: 'En route vers votre adresse'

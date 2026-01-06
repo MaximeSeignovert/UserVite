@@ -237,6 +237,46 @@ class OrderService {
     }
   }
 
+  // Marquer une commande comme en cours de livraison
+  async onTheWayCommande(id: string, token: string | null): Promise<void> {
+    try {
+      const url = buildApiUrl(`${API_CONFIG.COMMANDES.ON_THE_WAY}/${id}`);
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: getAuthHeaders(token),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Commande non trouvée');
+        }
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+    } catch (error) {
+      throw new Error(`Erreur lors de la mise à jour du statut: ${handleApiError(error)}`);
+    }
+  }
+
+  // Marquer une commande comme livrée
+  async deliveredCommande(id: string, token: string | null): Promise<void> {
+    try {
+      const url = buildApiUrl(`${API_CONFIG.COMMANDES.DELIVER}/${id}`);
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: getAuthHeaders(token),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Commande non trouvée');
+        }
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+    } catch (error) {
+      throw new Error(`Erreur lors de la mise à jour du statut: ${handleApiError(error)}`);
+    }
+  }
+
   // Méthode générique pour changer le statut d'une commande (pour les restaurateurs)
   async updateRestaurantOrderStatus(id: string, status: UnifiedOrderStatus, token: string | null): Promise<void> {
     try {
@@ -249,6 +289,12 @@ class OrderService {
           break;
         case UnifiedOrderStatus.READY:
           await this.readyCommande(id, token);
+          break;
+        case UnifiedOrderStatus.ON_THE_WAY:
+          await this.onTheWayCommande(id, token);
+          break;
+        case UnifiedOrderStatus.DELIVERED:
+          await this.deliveredCommande(id, token);
           break;
         case UnifiedOrderStatus.CANCELLED:
           await this.cancelCommande(id, token);

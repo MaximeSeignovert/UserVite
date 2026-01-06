@@ -1,4 +1,5 @@
 import type { Delivery, DeliveryPerson } from '../types/index';
+import { UnifiedOrderStatus } from '../types/index';
 
 export const mockDeliveryPersons: DeliveryPerson[] = [
   {
@@ -41,7 +42,7 @@ export const mockDeliveries: Delivery[] = [
     deliveryAddressId: 'addr-1',
     dispatchedAt: new Date('2024-01-15T13:00:00Z'),
     deliveredAt: new Date('2024-01-15T13:25:00Z'),
-    status: 'delivered'
+    status: UnifiedOrderStatus.DELIVERED
   },
   {
     id: 'delivery-order-2',
@@ -49,14 +50,14 @@ export const mockDeliveries: Delivery[] = [
     deliveryPersonId: 'delivery-1',
     deliveryAddressId: 'addr-3',
     dispatchedAt: new Date('2024-01-15T20:10:00Z'),
-    status: 'on-the-way'
+    status: UnifiedOrderStatus.ON_THE_WAY
   },
   {
     id: 'delivery-order-3',
     orderId: 'order-3',
     deliveryPersonId: 'delivery-3',
     deliveryAddressId: 'addr-2',
-    status: 'pending'
+    status: UnifiedOrderStatus.PENDING
   },
   {
     id: 'delivery-order-4',
@@ -64,13 +65,13 @@ export const mockDeliveries: Delivery[] = [
     deliveryPersonId: 'delivery-4',
     deliveryAddressId: 'addr-4',
     dispatchedAt: new Date('2024-01-15T18:45:00Z'),
-    status: 'dispatched'
+    status: UnifiedOrderStatus.ON_THE_WAY
   },
   {
     id: 'delivery-order-5',
     orderId: 'order-5',
     deliveryPersonId: 'delivery-1',
     deliveryAddressId: 'addr-3',
-    status: 'pending'
+    status: UnifiedOrderStatus.PENDING
   }
 ]; 

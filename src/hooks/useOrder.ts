@@ -7,8 +7,8 @@ import type {
   OrderDetails, 
   CreateCommandeRequest,
   CartItem,
-  Address,
-  LigneCommande
+  LigneCommande,
+  UnifiedOrderStatus
 } from '../types';
 
 interface UseOrderReturn {
@@ -150,7 +150,7 @@ export const useOrder = (): UseOrderReturn => {
     setError(null);
 
     try {
-      await orderService.updateCommandeStatus(orderId, status, token);
+      await orderService.updateCommandeStatus(orderId, status as UnifiedOrderStatus, token);
       
       // Mettre à jour l'état local si c'est la commande courante
       if (currentOrder && currentOrder.id === orderId) {

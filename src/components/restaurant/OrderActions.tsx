@@ -14,7 +14,6 @@ interface OrderActionsProps {
 export const OrderActions = ({ 
   orderStatus, 
   isUpdating, 
-  estimatedTime, 
   onStatusUpdate 
 }: OrderActionsProps) => {
   const renderActionButtons = () => {
@@ -68,13 +67,6 @@ export const OrderActions = ({
           </Badge>
         );
 
-      case UnifiedOrderStatus.PICKED_UP:
-        return (
-          <Badge variant="outline" className="text-purple-600 text-base px-4 py-2">
-            Commande récupérée par le livreur
-          </Badge>
-        );
-
       case UnifiedOrderStatus.CANCELLED:
         return (
           <Badge variant="destructive" className="text-base px-4 py-2">
@@ -99,11 +91,6 @@ export const OrderActions = ({
         <div className="flex gap-2 flex-wrap">
           {renderActionButtons()}
         </div>
-        {estimatedTime > 0 && orderStatus !== UnifiedOrderStatus.PICKED_UP && orderStatus !== UnifiedOrderStatus.CANCELLED && (
-          <p className="text-sm text-gray-600 mt-2">
-            Temps estimé restant: {estimatedTime} minutes
-          </p>
-        )}
         {orderStatus === UnifiedOrderStatus.CANCELLED && (
           <p className="text-sm text-red-600 mt-2">
             Cette commande a été annulée et ne peut plus être modifiée.
